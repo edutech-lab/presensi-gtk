@@ -19,6 +19,7 @@ presensi-gtk/
 
 ## Pembaruan versi ini
 
+- Pemindaian lebih cepat: model wajah dimuat di latar belakang setelah login dan dipanaskan, deteksi memakai ukuran input lebih kecil, sidik wajah disiapkan selama wajah terlihat sehingga tombol Presensi langsung diproses, dan hasil presensi langsung diumumkan tanpa menunggu penyegaran status.
 - Kamera aktif otomatis saat menu Presensi dibuka (tombol Aktifkan Kamera dihapus) dan mati otomatis saat pindah menu, keluar aplikasi, atau tab disembunyikan.
 - Tombol Kembali pada HP/tablet membuka menu sebelumnya. Jika modal atau menu samping terbuka, Kembali menutupnya terlebih dahulu. Di Beranda, Kembali meminta konfirmasi sekali sebelum keluar.
 - Pemindaian wajah lebih akurat: panduan posisi langsung (cahaya, jarak, posisi tengah, wajah lurus), hanya frame berkualitas baik yang dipindai, beberapa frame dirata-ratakan, dan frame yang menyimpang dibuang.
@@ -77,7 +78,7 @@ Kamera dan GPS hanya berfungsi lewat HTTPS. Domain `*.vercel.app` sudah HTTPS.
 
 ## Catatan PWA
 
-- Presensi tetap membutuhkan internet. Service worker hanya menyimpan halaman, manifest, dan ikon; data presensi, wajah, login, dan permintaan ke Supabase tidak disimpan.
+- Presensi tetap membutuhkan internet. Service worker menyimpan halaman, manifest, ikon, dan berkas model pengenalan wajah (berkas publik, bukan data pegawai); data presensi, wajah, login, dan permintaan ke Supabase tidak disimpan.
 - Setelah memperbarui `index.html`, ubah `VER` di `sw.js` (mis. `gtk-shell-v2`) agar cache perangkat lama diganti. Halaman tetap diambil dari jaringan lebih dulu.
 - Ajakan instal hanya muncul lewat HTTPS dan di browser yang mendukung (Chrome/Edge Android). Jika sudah terpasang, banner tidak tampil.
 
