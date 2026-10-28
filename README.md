@@ -19,6 +19,7 @@ presensi-gtk/
 
 ## Pembaruan versi ini
 
+- Lokasi lebih andal di berbagai HP: posisi cepat dari Wi-Fi/seluler lebih dulu, lalu disempurnakan GPS; ada pantauan cadangan jika GPS lambat; pesan galat spesifik (izin ditolak, GPS mati, sinyal lemah) dengan tombol Muat Ulang Lokasi; peringatan jika akurasi rendah. Kamera baru diminta setelah izin lokasi terjawab agar dua permintaan izin tidak bertabrakan.
 - Pemindaian lebih cepat: model wajah dimuat di latar belakang setelah login dan dipanaskan, deteksi memakai ukuran input lebih kecil, sidik wajah disiapkan selama wajah terlihat sehingga tombol Presensi langsung diproses, dan hasil presensi langsung diumumkan tanpa menunggu penyegaran status.
 - Kamera aktif otomatis saat menu Presensi dibuka (tombol Aktifkan Kamera dihapus) dan mati otomatis saat pindah menu, keluar aplikasi, atau tab disembunyikan.
 - Tombol Kembali pada HP/tablet membuka menu sebelumnya. Jika modal atau menu samping terbuka, Kembali menutupnya terlebih dahulu. Di Beranda, Kembali meminta konfirmasi sekali sebelum keluar.

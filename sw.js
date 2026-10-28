@@ -2,7 +2,7 @@
    Hanya menyimpan "kerangka" aplikasi (halaman, manifest, ikon) agar cepat terbuka.
    Data presensi, wajah, login, dan semua permintaan ke Supabase TIDAK disimpan dan tidak disentuh.
    Pengecualian: berkas model pengenalan wajah (publik, ~7 MB) disimpan agar tidak diunduh ulang. */
-const VER = 'gtk-shell-v2';
+const VER = 'gtk-shell-v3';
 const FACE = 'gtk-face-v1';   // model pengenalan wajah (berkas publik, bukan data pegawai)
 const FACE_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'];

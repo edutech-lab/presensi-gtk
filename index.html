@@ -557,20 +557,21 @@ PAGES.dash=async()=>{const d=await api('dashboard'),adm=S.user.role==='Admin',st
   mkChart('#cPie',{type:'doughnut',data:{labels:pieL,datasets:[{data:tot?d.pie:[1],backgroundColor:tot?cols:['#e2e8f0'],borderWidth:0}]},options:{cutout:'68%',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:!!tot}}},plugins:[{id:'ct',afterDraw(c){const x=c.ctx,a=c.chartArea,cx=(a.left+a.right)/2,cy=(a.top+a.bottom)/2;x.save();x.textAlign='center';x.fillStyle='#0f1d3a';x.font="800 22px 'Plus Jakarta Sans'";x.fillText(tot,cx,cy+5);x.fillStyle='#64748b';x.font="600 10px 'Plus Jakarta Sans'";x.fillText(adm?'Pegawai':'Hari',cx,cy+20);x.restore()}}]})};
 
 /* ================= PRESENSI (PEGAWAI) ================= */
-const P={pos:null,stream:null,watch:null,tm:null,map:null,um:null,faceReady:false,today:null,busy:false,camTok:0,camBusy:false,type:null,det:null,camErr:'',q:null,idle:'',fl:null,buf:[],want:false};
+const P={pos:null,stream:null,watch:null,tm:null,map:null,um:null,faceReady:false,today:null,busy:false,camTok:0,camBusy:false,type:null,det:null,camErr:'',q:null,idle:'',fl:null,buf:[],want:false,w2:null,gpsErr:'',gpsGo:false,posT:0,slowT:null,lowT:null,goT:null};
 PAGES.presensi=async()=>{P.today=await api('myToday');P.pos=null;P.stream=null;P.camTok++;P.camBusy=false;P.type=null;P.camErr='';P.q=null;P.idle='';P.buf=[];P.want=false;clearTimeout(P.det);P.det=null;const st=S.st;
   setView(`<div class="pr"><div class="card nm"><div class="ch"><h3>${ic('camera')} Presensi Wajah</h3></div>
     <div class="cam" id="cam"><video id="vid" autoplay playsinline muted class="hid"></video><div id="camPh"><i class="spn"></i><p>Menyiapkan kamera...</p></div><div class="hud hid" id="camHud"><b><i></i><span id="camSt"></span></b></div></div>
     <div class="note" id="pNote">Memuat...</div>
+    <div class="bg hid" id="gpsRow" style="margin-top:8px"><button class="btn ghost" id="bGps" type="button">${ic('pin',16)} Muat Ulang Lokasi</button></div>
     ${S.user.face?'':`<div class="bg"><button class="btn ghost" id="bEnr">${ic('user',16)} Daftarkan Wajah</button></div>`}
     <div class="bg" style="margin-top:8px"><button class="btn green" id="bPres" disabled>${ic('check',16)} Presensi Masuk</button></div>
     ${IS?`<label style="display:flex;gap:8px;margin-top:12px;font-size:12px;color:#475a7a"><input type="checkbox" id="simOut"/> Simulasi berada di luar jangkauan lokasi (khusus Preview)</label>`:''}</div>
     <div><div class="card"><div class="big" id="pClock">--:--:--</div><div style="color:#64748b;margin-bottom:8px" id="pDate"></div>
     <div class="kv"><span>Jam masuk</span><b>${esc(jamOf(S.user.jenisPTK).m)}</b></div><div class="kv"><span>Jam pulang</span><b>${esc(jamOf(S.user.jenisPTK).p)}</b></div><div class="kv"><span>Presensi masuk</span><b id="pIn">-</b></div><div class="kv"><span>Presensi pulang</span><b id="pOut">-</b></div></div>
     <div class="card nm"><div class="ch"><h3>${ic('pin')} Lokasi</h3><span id="pDist" class="chip n">Mencari GPS...</span></div><div class="map" id="pmap"></div></div></div></div>`);
-  if($('#bEnr'))$('#bEnr').onclick=enrollFace;$('#bPres').onclick=()=>{if(P.type)doPres(P.type)};
+  if($('#bEnr'))$('#bEnr').onclick=enrollFace;$('#bGps').onclick=()=>{P.gpsErr='';startGps();pUpd()};$('#bPres').onclick=()=>{if(P.type)doPres(P.type)};
   initMap();startGps();P.tm=setInterval(pUpd,1000);pUpd();
-  S.cleanup=()=>{sndStop();clearInterval(P.tm);if(P.watch!=null&&navigator.geolocation)navigator.geolocation.clearWatch(P.watch);P.watch=null;P.camTok++;P.camBusy=false;clearTimeout(P.det);P.det=null;if(P.stream)P.stream.getTracks().forEach(t=>t.stop());P.stream=null;if(P.map){P.map.remove();P.map=null}}};
+  S.cleanup=()=>{sndStop();clearInterval(P.tm);stopGps();P.camTok++;P.camBusy=false;clearTimeout(P.det);P.det=null;if(P.stream)P.stream.getTracks().forEach(t=>t.stop());P.stream=null;if(P.map){P.map.remove();P.map=null}}};
 function initMap(){if(!window.L)return;const la=+S.st.Latitude,ln=+S.st.Longitude;P.map=L.map('pmap',{zoomControl:true,attributionControl:false}).setView([la,ln],17);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(P.map);
   L.circle([la,ln],{radius:+S.st.RadiusMeter,color:'#1a6fe8',fillOpacity:.12,weight:2}).addTo(P.map);
@@ -579,25 +580,56 @@ function setPos(lat,lng,acc){P.pos={lat,lng,acc};P.dist=dist(lat,lng,+S.st.Latit
   if(P.map&&window.L){if(!P.um)P.um=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="pinU"></div>',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(P.map);else P.um.setLatLng([lat,lng]);
     P.map.fitBounds(L.latLngBounds([[lat,lng],[+S.st.Latitude,+S.st.Longitude]]).pad(.5),{maxZoom:18})}
   pUpd()}
-function startGps(){P.um=null;
-  if(IS){const f=()=>{const out=$('#simOut')&&$('#simOut').checked;setPos(+S.st.Latitude+(out?.004:.0003),+S.st.Longitude+(out?.004:.0003),10)};f();const c=$('#simOut');if(c)c.onchange=f;return}
-  if(!navigator.geolocation){$('#pNote').className='note r';$('#pNote').textContent='Browser tidak mendukung GPS.';return}
-  P.watch=navigator.geolocation.watchPosition(p=>setPos(p.coords.latitude,p.coords.longitude,p.coords.accuracy),e=>{$('#pDist').className='chip r';$('#pDist').textContent='GPS ditolak/gagal';toast('Izinkan akses lokasi pada browser Anda.','err')},{enableHighAccuracy:true,maximumAge:3000,timeout:25000})}
+/* ===== GPS: tahan banting di berbagai HP =====
+   1) tembakan cepat akurasi rendah (Wi-Fi/seluler) agar posisi langsung muncul,
+   2) pantauan akurasi tinggi (GPS) untuk menyempurnakan,
+   3) jika 8 detik belum ada posisi, aktifkan pantauan cadangan akurasi rendah,
+   4) pesan galat spesifik + tombol Muat Ulang Lokasi.
+   Kamera baru diminta setelah izin lokasi terjawab, agar dua permintaan izin tidak saling bertabrakan. */
+const inApp=/FBAN|FBAV|Instagram|MicroMessenger|Line\/|; wv\)/i.test(navigator.userAgent);
+function stopGps(){const g=navigator.geolocation;if(g){if(P.watch!=null)g.clearWatch(P.watch);if(P.w2!=null)g.clearWatch(P.w2)}P.watch=null;P.w2=null;clearTimeout(P.slowT);clearTimeout(P.lowT);clearTimeout(P.goT)}
+function onFix(p){const c=p.coords;if(P.pos&&c.accuracy>P.pos.acc+50&&Date.now()-P.posT<20000)return;P.posT=Date.now();P.gpsErr='';P.gpsGo=true;setPos(c.latitude,c.longitude,c.accuracy)}
+function onErr(e){P.gpsGo=true;if(P.pos)return;const c=e&&e.code;
+  if(c===1)P.gpsErr='denied';else if(c===2){if(P.gpsErr!=='denied')P.gpsErr='unavail'}else if(P.gpsErr!=='denied'&&P.gpsErr!=='unavail')P.gpsErr='timeout';
+  pUpd();if(c!==1)startLow()}
+function startLow(){const g=navigator.geolocation;if(!g||P.w2!=null||S.page!=='presensi')return;
+  P.w2=g.watchPosition(onFix,e=>{if(!P.pos&&e&&e.code===1){P.gpsErr='denied';pUpd()}},{enableHighAccuracy:false,maximumAge:15000,timeout:30000})}
+function gpsMsg(){const e=P.gpsErr,ios=isIos(),tail=inApp?' Jika aplikasi dibuka dari dalam Facebook/Instagram, buka lewat Chrome atau Safari.':'';
+  if(e==='nosup')return 'Browser tidak mendukung GPS. Gunakan Chrome atau Safari terbaru.';
+  if(e==='denied')return (ios?'Izin lokasi ditolak. Buka Pengaturan > Privasi & Keamanan > Layanan Lokasi (aktifkan), lalu pilih Safari/Situs Web > Saat Menggunakan App.':'Izin lokasi ditolak. Ketuk ikon gembok di kolom alamat > Izin > Lokasi > Izinkan.')+' Setelah itu tekan Muat Ulang Lokasi.'+tail;
+  if(e==='unavail')return 'Sinyal lokasi tidak tersedia. Aktifkan Lokasi/GPS di pengaturan HP (mode Akurasi Tinggi), keluar dari ruangan tertutup, lalu tekan Muat Ulang Lokasi.'+tail;
+  if(e==='timeout'||e==='slow')return 'Lokasi belum terbaca. Pastikan Lokasi/GPS aktif dan ada sinyal, lalu tekan Muat Ulang Lokasi.'+tail;
+  return 'Menunggu lokasi GPS...'}
+function startGps(){stopGps();P.um=null;P.gpsErr='';P.gpsGo=false;
+  if(IS){const f=()=>{const out=$('#simOut')&&$('#simOut').checked;P.gpsGo=true;setPos(+S.st.Latitude+(out?.004:.0003),+S.st.Longitude+(out?.004:.0003),10)};f();const c=$('#simOut');if(c)c.onchange=f;return}
+  if(!navigator.geolocation){P.gpsErr='nosup';P.gpsGo=true;pUpd();return}
+  const g=navigator.geolocation;
+  g.getCurrentPosition(onFix,onErr,{enableHighAccuracy:false,maximumAge:60000,timeout:10000});
+  P.watch=g.watchPosition(onFix,onErr,{enableHighAccuracy:true,maximumAge:3000,timeout:20000});
+  P.lowT=setTimeout(()=>{if(!P.pos)startLow()},8000);
+  P.slowT=setTimeout(()=>{if(!P.pos&&!P.gpsErr){P.gpsErr='slow';pUpd()}},12000);
+  P.goT=setTimeout(()=>{P.gpsGo=true},7000);
+  if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(r=>{
+    if(r.state!=='prompt')P.gpsGo=true;if(r.state==='denied'&&!P.pos){P.gpsErr='denied';pUpd()}
+    r.onchange=()=>{if(r.state==='granted'&&!P.pos&&S.page==='presensi')startGps()}}).catch(()=>{})}
 function pUpd(){if(S.page!=='presensi'||!$('#pClock'))return;const t=P.today,st=S.st,w=wib(),nm=toMin(w.time.slice(0,5)),tol=st.ToleransiJam*60,jj=jamOf(S.user.jenisPTK),jm=toMin(jj.m),jp=toMin(jj.p);
   $('#pClock').textContent=w.time+' WIB';$('#pDate').textContent=HARIF[dow(w.date)]+', '+fd(w.date);
   const r=t.rec||{};$('#pIn').innerHTML=r.masuk?esc(r.masuk)+' '+stChip(r.stMasuk):'-';$('#pOut').innerHTML=r.pulang?esc(r.pulang)+' '+stChip(r.stPulang):'-';
   const inR=P.pos&&P.dist<=+st.RadiusMeter;
-  if(P.pos){const d=$('#pDist');d.className='chip '+(inR?'g':'r');d.textContent=Math.round(P.dist)+' m (maks '+st.RadiusMeter+' m)'}
+  {const d=$('#pDist');if(P.pos){d.className='chip '+(inR?'g':'r');d.textContent=Math.round(P.dist)+' m (maks '+st.RadiusMeter+' m)'}
+   else{d.className='chip '+(P.gpsErr?'r':'n');d.textContent=P.gpsErr==='denied'?'Izin lokasi ditolak':P.gpsErr?'Lokasi belum terbaca':'Mencari GPS...'}
+   const gr=$('#gpsRow');if(gr)gr.classList.toggle('hid',!!P.pos||!P.gpsErr)}
+  const accN=P.pos&&P.pos.acc>100?' (Akurasi GPS ±'+Math.round(P.pos.acc)+' m. Pindah ke area terbuka agar lebih tepat.)':'';
   const inM=nm>=jm-tol&&nm<=jm+tol,inP=nm>=jp-tol&&nm<=jp+tol;let msg='',cls='note';
   if(!t.workday){msg=t.libur?'Hari libur: '+t.libur:'Hari ini bukan hari kerja.'}
   else if(t.izin){msg='Hari ini Anda tercatat: '+t.izin.jenis+(t.izin.ket?' ('+t.izin.ket+')':'')}
   else if(!S.user.face){msg='Wajah belum terdaftar. Hadapkan wajah ke kamera lalu tekan "Daftarkan Wajah".';cls='note r'}
-  else if(!P.pos){msg='Menunggu lokasi GPS...'}
-  else if(!inR){msg='Anda berada di luar jangkauan lokasi presensi ('+Math.round(P.dist)+' m). Mendekatlah ke sekolah.';cls='note r'}
+  else if(!P.pos){msg=gpsMsg();if(P.gpsErr)cls='note r'}
+  else if(!inR){msg='Anda berada di luar jangkauan lokasi presensi ('+Math.round(P.dist)+' m). Mendekatlah ke sekolah.'+accN;cls='note r'}
   else if(r.masuk&&r.pulang){msg='Presensi hari ini sudah lengkap. Terima kasih!';cls='note g'}
   else if(!r.masuk&&!inM){msg='Presensi masuk dibuka pukul '+hm(jm-tol)+' - '+hm(jm+tol)+' WIB.'}
   else if(r.masuk&&!r.pulang&&!inP){msg='Presensi pulang dibuka pukul '+hm(jp-tol)+' - '+hm(jp+tol)+' WIB.'}
-  else{msg='Lokasi sesuai. Pastikan wajah terlihat jelas pada kamera.';cls='note g'}
+  else{msg='Lokasi sesuai.'+accN+' Pastikan wajah terlihat jelas pada kamera.';cls='note g'}
   const n=$('#pNote');if(!P.busy){n.className=cls;n.textContent=msg}
   const ok=t.workday&&!t.izin&&S.user.face&&inR&&!P.busy;
   let ty=null,can=false;if(!r.masuk&&inM){ty='masuk';can=true}else if(!r.pulang&&inP){ty='pulang';can=true}else if(r.masuk&&r.pulang)ty='selesai';else ty=r.masuk?'pulang':'masuk';
@@ -611,7 +643,7 @@ function camPh(k,m){const ph=$('#camPh');if(!ph)return;P.idle='';ph.classList.re
   ph.innerHTML=(k==='load'?'<i class="spn"></i>':ic('camera',40))+'<p>'+esc(m)+'</p>'+(k==='err'?'<button class="btn ghost" id="bRetry" type="button">'+ic('refresh',14)+' Coba Lagi</button>':'');
   const r=$('#bRetry');if(r)r.onclick=()=>{P.camErr='';startCam()}}
 function camIdle(m){if(P.camErr)return;const t=m||'Kamera aktif otomatis saat presensi dibuka';if(P.idle===t)return;camPh('idle','Kamera nonaktif. '+t+'.');P.idle=t}
-function camSync(need,m){if(need){if(!P.stream&&!P.camBusy&&!P.camErr&&!document.hidden)startCam()}
+function camSync(need,m){if(need){if(!P.stream&&!P.camBusy&&!P.camErr&&!document.hidden){if(P.gpsGo)startCam();else if(P.idle!=='gps'){camPh('load','Menunggu izin lokasi...');P.idle='gps'}}}
   else{if(P.stream&&!P.busy)stopCam(m);if(!P.stream&&!P.camBusy)camIdle(m)}}
 function idleMsg(t,r,jm,jp,tol){if(!t.workday)return t.libur?'Hari libur: '+t.libur:'Hari ini bukan hari kerja';if(t.izin)return 'Hari ini Anda tercatat '+t.izin.jenis;
   if(r.masuk&&r.pulang)return 'Presensi hari ini sudah lengkap';if(!r.masuk)return 'Presensi masuk dibuka pukul '+hm(jm-tol)+' - '+hm(jm+tol)+' WIB';return 'Presensi pulang dibuka pukul '+hm(jp-tol)+' - '+hm(jp+tol)+' WIB'}
