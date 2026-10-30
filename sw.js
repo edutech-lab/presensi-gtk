@@ -1,10 +1,10 @@
 /* Service worker Presensi GTK.
    Hanya menyimpan "kerangka" aplikasi (halaman, manifest, ikon) agar cepat terbuka.
-   Data presensi, wajah, login, dan semua permintaan ke Supabase TIDAK disimpan dan tidak disentuh.
-   Pengecualian: berkas model pengenalan wajah (publik, ~7 MB) disimpan agar tidak diunduh ulang. */
-const VER = 'gtk-shell-v3';
-const FACE = 'gtk-face-v1';   // model pengenalan wajah (berkas publik, bukan data pegawai)
-const FACE_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+   Model pengenalan wajah (file publik face-api di jsDelivr) juga disimpan agar tidak diunduh ulang.
+   Data presensi, wajah, login, dan permintaan ke Supabase TIDAK disimpan dan tidak disentuh. */
+const VER = 'gtk-shell-v4';
+const FACE = 'gtk-face-v1';
+const FACE_RE = /^https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@/;
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -19,11 +19,11 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const r = e.request, u = new URL(r.url);
-  if (r.method === 'GET' && r.url.startsWith(FACE_URL)) {                // model wajah: cache dulu agar pemuatan berikutnya instan
-    e.respondWith(caches.open(FACE).then(c => c.match(r).then(hit => hit || fetch(r).then(res => { if (res.ok) c.put(r, res.clone()); return res; }))));
+  if (r.method === 'GET' && FACE_RE.test(r.url)) {                       // skrip & model wajah: cache dulu
+    e.respondWith(caches.open(FACE).then(c => c.match(r).then(hit => hit || fetch(r).then(res => { if (res && (res.ok || res.type === 'opaque')) c.put(r, res.clone()); return res; }))));
     return;
   }
-  if (r.method !== 'GET' || u.origin !== self.location.origin) return;   // lintas-origin lain (Supabase, CDN) dibiarkan langsung ke jaringan
+  if (r.method !== 'GET' || u.origin !== self.location.origin) return;   // lintas-origin (Supabase, CDN) dibiarkan langsung ke jaringan
   if (r.mode === 'navigate') {                                           // halaman: jaringan dulu, cadangan dari cache
     e.respondWith(
       fetch(r).then(res => { const cp = res.clone(); caches.open(VER).then(c => c.put('./', cp)); return res; })
