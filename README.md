@@ -19,10 +19,11 @@ presensi-gtk/
 
 ## Pembaruan versi ini
 
-- Pendaftaran wajah lebih ringkas: satu kali rekam (5 frame baik, sekitar 2 detik) dan satu kali ketuk, tidak lagi 3 putaran dengan pemeriksaan antar-putaran. Batas waktu 15 detik, dengan petunjuk langsung di layar jika posisi atau cahaya kurang. Wajah yang sudah terdaftar tidak berubah.
-- GPS lebih andal di iPhone: lokasi cepat dari Wi-Fi/seluler diambil lebih dulu, lalu dipantau dengan akurasi tinggi. Jika 12 detik belum ada lokasi, otomatis dicoba ulang dengan mode hemat. Pesan error kini spesifik (izin ditolak, sinyal belum ada, akurasi rendah) dengan langkah perbaikannya. Tersedia tombol Ulangi, dan lokasi dimuat ulang otomatis saat pengguna kembali ke aplikasi (misalnya setelah mengubah izin di Pengaturan).
-- Akurasi GPS ditampilkan di chip jarak bila di atas 100 m. Aturan jarak ke sekolah tidak berubah.
-- `sw.js` naik ke `gtk-shell-v4`. `Supabase_Setup.sql` tidak berubah.
+- Presensi otomatis: tombol Presensi Masuk/Pulang dihapus. Begitu wajah terbaca stabil (sekitar 1,5 detik) dan lokasi serta jam presensi sesuai, presensi langsung disimpan. Server tetap mencocokkan wajah. Bila gagal, dicoba otomatis maksimal 3 kali (jeda 6 detik), lalu muncul tombol "Coba Presensi Lagi". Setelah berhasil, tidak diulang selama halaman Presensi yang sama masih terbuka.
+- Pesan galat kini tetap tampil sekitar 9 detik di bawah kamera.
+- Tombol Daftarkan Wajah tetap ada untuk pegawai yang belum terdaftar (pendaftaran tidak otomatis).
+- Kunci suara dibuka pada sentuhan pertama di mana pun, karena tidak ada lagi tombol yang ditekan saat presensi.
+- `sw.js` naik ke `gtk-shell-v5`. `Supabase_Setup.sql` tidak berubah.
 
 ## Konfigurasi
 

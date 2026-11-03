@@ -589,17 +589,17 @@ PAGES.dash=async()=>{const d=await api('dashboard'),adm=S.user.role==='Admin',st
 
 /* ================= PRESENSI (PEGAWAI) ================= */
 const P={pos:null,stream:null,watch:null,tm:null,map:null,um:null,faceReady:false,today:null,busy:false,camTok:0,camBusy:false,type:null,det:null,camErr:'',q:null,idle:'',fl:null};
-PAGES.presensi=async()=>{P.today=await api('myToday');P.pos=null;P.gMsg='';P.stream=null;P.camTok++;P.camBusy=false;P.type=null;P.camErr='';P.q=null;P.idle='';clearTimeout(P.det);P.det=null;const st=S.st;
+PAGES.presensi=async()=>{P.today=await api('myToday');P.pos=null;P.gMsg='';P.stream=null;P.camTok++;P.camBusy=false;P.type=null;P.auto=null;P.autoOk=0;P.autoN=0;P.autoAt=0;P.err='';P.q=null;P.idle='';clearTimeout(P.det);P.det=null;const st=S.st;
   setView(`<div class="pr"><div class="card nm"><div class="ch"><h3>${ic('camera')} Presensi Wajah</h3></div>
     <div class="cam" id="cam"><video id="vid" autoplay playsinline muted class="hid"></video><div id="camPh"><i class="spn"></i><p>Menyiapkan kamera...</p></div><div class="hud hid" id="camHud"><b><i></i><span id="camSt"></span></b></div></div>
     <div class="note" id="pNote">Memuat...</div>
     ${S.user.face?'':`<div class="bg"><button class="btn ghost" id="bEnr">${ic('user',16)} Daftarkan Wajah</button></div>`}
-    <div class="bg" style="margin-top:8px"><button class="btn green" id="bPres" disabled>${ic('check',16)} Presensi Masuk</button></div>
+    <div class="bg hid" id="pRetry" style="margin-top:8px"><button class="btn ghost" id="bRetryPres" type="button">${ic('refresh',16)} Coba Presensi Lagi</button></div>
     ${IS?`<label style="display:flex;gap:8px;margin-top:12px;font-size:12px;color:#475a7a"><input type="checkbox" id="simOut"/> Simulasi berada di luar jangkauan lokasi (khusus Preview)</label>`:''}</div>
     <div><div class="card"><div class="big" id="pClock">--:--:--</div><div style="color:#64748b;margin-bottom:8px" id="pDate"></div>
     <div class="kv"><span>Jam masuk</span><b>${esc(jamOf(S.user.jenisPTK).m)}</b></div><div class="kv"><span>Jam pulang</span><b>${esc(jamOf(S.user.jenisPTK).p)}</b></div><div class="kv"><span>Presensi masuk</span><b id="pIn">-</b></div><div class="kv"><span>Presensi pulang</span><b id="pOut">-</b></div></div>
     <div class="card nm"><div class="ch"><h3>${ic('pin')} Lokasi</h3><div style="display:flex;gap:6px;align-items:center"><span id="pDist" class="chip n">Mencari GPS...</span><button class="btn ghost" id="bGps" type="button" style="padding:5px 10px;font-size:12px">${ic('refresh',14)} Ulangi</button></div></div><div class="map" id="pmap"></div></div></div></div>`);
-  if($('#bEnr'))$('#bEnr').onclick=enrollFace;if($('#bGps'))$('#bGps').onclick=()=>{P.gMsg='';gpsRun(true)};$('#bPres').onclick=()=>{if(P.type)doPres(P.type)};
+  if($('#bEnr'))$('#bEnr').onclick=enrollFace;if($('#bGps'))$('#bGps').onclick=()=>{P.gMsg='';gpsRun(true)};$('#bRetryPres').onclick=()=>{P.autoN=0;P.autoAt=0;P.err='';P.buf=[];$('#pRetry').classList.add('hid');pUpd()};
   initMap();startGps();P.tm=setInterval(pUpd,1000);pUpd();
   S.cleanup=()=>{sndStop();clearInterval(P.tm);gpsStop();P.camTok++;P.camBusy=false;clearTimeout(P.det);P.det=null;if(P.stream)P.stream.getTracks().forEach(t=>t.stop());P.stream=null;if(P.map){P.map.remove();P.map=null}}};
 function initMap(){if(!window.L)return;const la=+S.st.Latitude,ln=+S.st.Longitude;P.map=L.map('pmap',{zoomControl:true,attributionControl:false}).setView([la,ln],17);
@@ -646,13 +646,19 @@ function pUpd(){if(S.page!=='presensi'||!$('#pClock'))return;const t=P.today,st=
   else if(r.masuk&&r.pulang){msg='Presensi hari ini sudah lengkap. Terima kasih!';cls='note g'}
   else if(!r.masuk&&!inM){msg='Presensi masuk dibuka pukul '+hm(jm-tol)+' - '+hm(jm+tol)+' WIB.'}
   else if(r.masuk&&!r.pulang&&!inP){msg='Presensi pulang dibuka pukul '+hm(jp-tol)+' - '+hm(jp+tol)+' WIB.'}
-  else{msg='Lokasi sesuai. Pastikan wajah terlihat jelas pada kamera.';cls='note g'}
+  else{msg='Lokasi sesuai. Hadapkan wajah ke kamera, presensi tersimpan otomatis.';cls='note g'}
+  if(P.err&&Date.now()<P.errT){msg=P.err;cls='note r'}
   const n=$('#pNote');if(!P.busy){n.className=cls;n.textContent=msg}
   const ok=t.workday&&!t.izin&&S.user.face&&inR&&!P.busy;
   let ty=null,can=false;if(!r.masuk&&inM){ty='masuk';can=true}else if(!r.pulang&&inP){ty='pulang';can=true}else if(r.masuk&&r.pulang)ty='selesai';else ty=r.masuk?'pulang':'masuk';
-  P.type=can?ty:null;camSync(!!(t.workday&&!t.izin&&!(r.masuk&&r.pulang)&&(!S.user.face||can)),idleMsg(t,r,jm,jp,tol));const b=$('#bPres');if(!b)return;
-  if(b.dataset.ty!==ty){b.dataset.ty=ty;b.className='btn '+(ty==='pulang'?'amber':'green');b.innerHTML=ty==='pulang'?ic('logout',16)+' Presensi Pulang':ty==='selesai'?ic('check',16)+' Presensi Selesai':ic('check',16)+' Presensi Masuk'}
-  b.disabled=!(ok&&can)}
+  P.type=can?ty:null;P.auto=(ok&&can&&!P.autoOk)?ty:null;
+  camSync(!!(t.workday&&!t.izin&&!(r.masuk&&r.pulang)&&(!S.user.face||can)&&!P.autoOk),idleMsg(t,r,jm,jp,tol));
+  const rb=$('#pRetry');if(rb)rb.classList.toggle('hid',!(P.autoN>=3&&!P.autoOk&&P.auto));
+  if(IS)autoTry()}
+/* Presensi otomatis: begitu wajah terbaca stabil (>=2 frame baik berturut-turut) dan syarat lokasi/waktu terpenuhi, langsung disimpan.
+   Server tetap mencocokkan wajah. Maks. 3 percobaan otomatis (jeda 6 dtk), lalu muncul tombol Coba Presensi Lagi. Sekali berhasil, tidak diulang pada sesi halaman yang sama. */
+function autoTry(){if(P.busy||P.autoOk||!P.auto||document.hidden||Date.now()<P.autoAt||P.autoN>=3)return;
+  if(!IS&&(!P.stream||!P.buf||P.buf.length<2))return;doPres(P.auto,true)}
 /* ===== KAMERA OTOMATIS & PEMINDAI WAJAH ===== */
 const eu=(a,b)=>{let s=0;for(let i=0;i<a.length;i++){const x=a[i]-b[i];s+=x*x}return Math.sqrt(s)};
 const mean=L=>L[0].map((_,k)=>L.reduce((a,d)=>a+d[k],0)/L.length);
@@ -724,7 +730,7 @@ function faceLoop(tok){clearTimeout(P.det);P.buf=[];
       const nb=P.buf[P.buf.length-1],full=!!(P.q&&P.q.ok&&(!nb||Date.now()-nb.t>700));
       const d=full?await faceapi.detectSingleFace(v,TFO()).withFaceLandmarks().withFaceDescriptor():await faceapi.detectSingleFace(v,TFO()).withFaceLandmarks();
       if(tok!==P.camTok||!P.stream)return;P.q=evalQ(d,v);
-      if(!P.busy){hud(P.q);if(P.q.ok){if(full&&d&&d.descriptor){P.buf.push({t:Date.now(),d:Array.from(d.descriptor)});if(P.buf.length>3)P.buf.shift()}}else P.buf=[]}}}catch(e){}}
+      if(!P.busy){hud(P.q);if(P.q.ok){if(full&&d&&d.descriptor){P.buf.push({t:Date.now(),d:Array.from(d.descriptor)});if(P.buf.length>3)P.buf.shift()}}else P.buf=[];autoTry()}}}catch(e){}}
     P.det=setTimeout(run,P.busy?500:100)};
   run()}
 /* Pindai beberapa frame berkualitas baik, buang frame yang menyimpang, lalu rata-ratakan agar hasil lebih stabil dan akurat. */
@@ -747,6 +753,7 @@ function snap(){const c=document.createElement('canvas');c.width=320;c.height=24
   return c.toDataURL('image/jpeg',.6)}
 /* ===== SUARA PRESENSI ===== */
 let _ac=null;
+['pointerup','touchend','keydown'].forEach(t=>document.addEventListener(t,()=>{try{sndUnlock()}catch(e){}},{passive:true,capture:true}));
 function sndUnlock(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;if(!_ac)_ac=new C();if(_ac.state==='suspended')_ac.resume()}catch(e){}}
 function sndTone(seq){try{sndUnlock();if(!_ac)return;let t=_ac.currentTime+.02;seq.forEach(([f,d,ty])=>{const o=_ac.createOscillator(),g=_ac.createGain();o.type=ty||'sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.28,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(_ac.destination);o.start(t);o.stop(t+d+.02);t+=d*.9})}catch(e){}}
 function sndVoice(){try{const L=(speechSynthesis.getVoices()||[]).filter(v=>/^id([-_]|$)/i.test(v.lang)||/indonesia/i.test(v.name));if(!L.length)return null;
@@ -773,12 +780,12 @@ let _au=null;
 function sndStop(){try{if(_au){_au.pause();_au=null}if('speechSynthesis' in window)speechSynthesis.cancel()}catch(e){}}
 function sndPres(kind,txt,key){if(kind==='ok')sndTone([[660,.16],[880,.16],[1175,.28]]);else if(kind==='warn')sndTone([[660,.18],[523,.3]]);else sndTone([[220,.28,'square'],[196,.4,'square']]);
   setTimeout(()=>{const src=SUARA[key];if(src){try{sndStop();_au=new Audio(src);_au.play().catch(()=>sndSay(txt))}catch(e){sndSay(txt)}}else sndSay(txt)},kind==='ok'?550:600)}
-async function doPres(type){if(P.busy)return;P.busy=true;sndUnlock();const n=$('#pNote');n.className='note';n.textContent='Memindai wajah... tahan posisi sejenak.';$('#bPres').disabled=true;
-  try{const desc=await getDesc(),photo=snap();const r=await api('submitPresensi',{type,lat:P.pos.lat,lng:P.pos.lng,desc,photo});toast(r.msg,'ok');
+async function doPres(type,auto){if(P.busy)return;P.busy=true;sndUnlock();P.err='';const n=$('#pNote');n.className='note g';n.textContent=auto?'Wajah terbaca. Menyimpan presensi '+type+'...':'Memindai wajah... tahan posisi sejenak.';
+  try{const desc=await getDesc(),photo=snap();const r=await api('submitPresensi',{type,lat:P.pos.lat,lng:P.pos.lng,desc,photo});P.autoOk=1;toast(r.msg,'ok');
     const rc=r.rec||{},nm=S.user.nama||'',bad=type==='masuk'?rc.stMasuk==='Terlambat':rc.stPulang==='Pulang Lebih Awal';
     sndPres(bad?'warn':'ok',sndText(type,bad,nm),type+(bad?(type==='masuk'?'Telat':'Awal'):'Ok'));
-    P.today=await api('myToday')}
-  catch(e){toast(e.message,'err');n.className='note r';n.textContent=e.message;sndPres('err','Presensi belum berhasil. '+String(e.message||'').replace(/\.\.\.|…/g,'.').slice(0,120),'gagal')}finally{P.busy=false;pUpd()}}
+    try{P.today=await api('myToday')}catch(e){}}
+  catch(e){P.autoN=(P.autoN||0)+1;P.autoAt=Date.now()+6000;P.err=e.message;P.errT=Date.now()+9000;toast(e.message,'err');n.className='note r';n.textContent=e.message;sndPres('err','Presensi belum berhasil. '+String(e.message||'').replace(/\.\.\.|…/g,'.').slice(0,120),'gagal')}finally{P.busy=false;pUpd()}}
 /* Pendaftaran wajah: satu kali rekam (5 frame baik, ±2 detik), bukan 3 putaran. Frame yang sudah siap di latar dipakai lebih dulu. */
 async function enrollFace(){if(P.busy||S.user.face)return;if(!IS&&!P.stream){toast('Kamera belum siap. Tunggu hingga kamera aktif.','err');return}
   P.busy=true;sndUnlock();const n=$('#pNote'),be=$('#bEnr');if(be)be.disabled=true;n.className='note';n.textContent='Merekam wajah... hadap lurus ke kamera dan tahan sebentar.';
