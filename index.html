@@ -753,7 +753,8 @@ function snap(){const c=document.createElement('canvas');c.width=320;c.height=24
   return c.toDataURL('image/jpeg',.6)}
 /* ===== SUARA PRESENSI ===== */
 let _ac=null;
-['pointerup','touchend','keydown'].forEach(t=>document.addEventListener(t,()=>{try{sndUnlock()}catch(e){}},{passive:true,capture:true}));
+['pointerup','touchend','keydown'].forEach(t=>document.addEventListener(t,()=>{try{sndUnlock();
+  if(!window._spPrimed&&'speechSynthesis' in window){window._spPrimed=1;const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}}catch(e){}},{passive:true,capture:true}));
 function sndUnlock(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;if(!_ac)_ac=new C();if(_ac.state==='suspended')_ac.resume()}catch(e){}}
 function sndTone(seq){try{sndUnlock();if(!_ac)return;let t=_ac.currentTime+.02;seq.forEach(([f,d,ty])=>{const o=_ac.createOscillator(),g=_ac.createGain();o.type=ty||'sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.28,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(_ac.destination);o.start(t);o.stop(t+d+.02);t+=d*.9})}catch(e){}}
 function sndVoice(){try{const L=(speechSynthesis.getVoices()||[]).filter(v=>/^id([-_]|$)/i.test(v.lang)||/indonesia/i.test(v.name));if(!L.length)return null;

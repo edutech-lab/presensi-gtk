@@ -22,8 +22,8 @@ presensi-gtk/
 - Presensi otomatis: tombol Presensi Masuk/Pulang dihapus. Begitu wajah terbaca stabil (sekitar 1,5 detik) dan lokasi serta jam presensi sesuai, presensi langsung disimpan. Server tetap mencocokkan wajah. Bila gagal, dicoba otomatis maksimal 3 kali (jeda 6 detik), lalu muncul tombol "Coba Presensi Lagi". Setelah berhasil, tidak diulang selama halaman Presensi yang sama masih terbuka.
 - Pesan galat kini tetap tampil sekitar 9 detik di bawah kamera.
 - Tombol Daftarkan Wajah tetap ada untuk pegawai yang belum terdaftar (pendaftaran tidak otomatis).
-- Kunci suara dibuka pada sentuhan pertama di mana pun, karena tidak ada lagi tombol yang ditekan saat presensi.
-- `sw.js` naik ke `gtk-shell-v5`. `Supabase_Setup.sql` tidak berubah.
+- Kunci suara (nada dan suara ucapan) dibuka pada sentuhan pertama di mana pun, karena tidak ada lagi tombol yang ditekan saat presensi.
+- `sw.js` naik ke `gtk-shell-v6`. `Supabase_Setup.sql` tidak berubah.
 
 ## Konfigurasi
 
