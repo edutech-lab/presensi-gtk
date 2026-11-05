@@ -70,7 +70,7 @@ insert into pengaturan(kunci,nilai) values
  ('NamaSekolah','SMP Negeri 1 Bandar Lampung'),('Alamat','Bandar Lampung, Provinsi Lampung'),
  ('LogoURL','https://lh3.googleusercontent.com/d/1GDe6aqXyF_RR6kL3jMCy0vWqaO83jgyp'),
  ('TahunAjaran','2026/2027'),('Semester','1 (Ganjil)'),('JamMasuk','07:00'),('JamPulang','15:00'),
- ('ToleransiJam','3'),('HariKerja','1,2,3,4,5'),('Latitude','-5.4294'),('Longitude','105.2625'),
+ ('ToleransiJam','3'),('ToleransiTerlambat','10'),('HariKerja','1,2,3,4,5'),('Latitude','-5.4294'),('Longitude','105.2625'),
  ('RadiusMeter','150'),('KepalaSekolah','Nama Kepala Sekolah, M.Pd'),('NIPKepsek','-'),('Kota','Bandar Lampung')
 on conflict (kunci) do nothing;
 
@@ -95,6 +95,9 @@ create policy gtk_surat_upload on storage.objects for insert to anon, authentica
 
 -- ---------- FUNGSI BANTU ----------
 create or replace function _cfg(k text) returns text language sql stable as $$ select nilai from pengaturan where kunci=k $$;
+-- toleransi keterlambatan (menit): presensi masuk setelah jam masuk sampai jam masuk + toleransi berstatus 'Toleransi' (tidak dihitung terlambat; bawaan 10)
+create or replace function _tt() returns int language sql stable as $$
+  select coalesce((select case when nilai ~ '^\d+$' then nilai::int end from pengaturan where kunci='ToleransiTerlambat'),10) $$;
 create or replace function _jam(ptk text, tipe text) returns text language sql stable as $$
   select coalesce(nullif(_cfg('Jam'||tipe||'_'||case ptk when 'Kepala Sekolah' then 'KS' when 'Guru' then 'Guru' when 'Tenaga Kependidikan' then 'Tendik' when 'Tenaga Kependidikan 2' then 'Tendik2' when 'Tenaga Kependidikan 3' then 'Tendik3' else '' end),''),_cfg('Jam'||tipe)) $$;
 create or replace function _tomin(t text) returns int language sql immutable as $$ select split_part(t,':',1)::int*60+split_part(t,':',2)::int $$;
@@ -111,7 +114,7 @@ create or replace function _hav(a float8,b float8,c float8,d float8) returns flo
   select 2*6371000*asin(sqrt(power(sin(radians(c-a)/2),2)+cos(radians(a))*cos(radians(c))*power(sin(radians(d-b)/2),2))) $$;
 create or replace function _set() returns jsonb language sql stable as $$
   select coalesce(jsonb_object_agg(kunci,nilai),'{}'::jsonb) from pengaturan
-  where kunci in ('NamaSekolah','Alamat','LogoURL','TahunAjaran','Semester','JamMasuk','JamPulang','ToleransiJam','HariKerja','Latitude','Longitude','RadiusMeter','KepalaSekolah','NIPKepsek','Kota')
+  where kunci in ('NamaSekolah','Alamat','LogoURL','TahunAjaran','Semester','JamMasuk','JamPulang','ToleransiJam','ToleransiTerlambat','HariKerja','Latitude','Longitude','RadiusMeter','KepalaSekolah','NIPKepsek','Kota')
      or kunci ~ '^Jam(Masuk|Pulang)_(KS|Guru|Tendik|Tendik2|Tendik3)$' $$;
 create or replace function _uobj(r pegawai) returns jsonb language sql stable as $$
   select jsonb_build_object('id',r.id,'nama',r.nama,'username',r.username,'role','Pegawai','jenisPTK',r.jenis_ptk,'status',r.status_kepegawaian,'nip',r.nip,'face',r.face is not null) $$;
@@ -142,7 +145,7 @@ create or replace function _rows(f date, t date, ids text[]) returns jsonb langu
 
 create or replace function _cnt(r jsonb) returns jsonb language sql stable as $$
   select jsonb_build_object(
-    'hadir',count(*) filter (where e->>'st'='Hadir'),'tepat',count(*) filter (where e->>'stMasuk'='Tepat Waktu'),
+    'hadir',count(*) filter (where e->>'st'='Hadir'),'tepat',count(*) filter (where e->>'stMasuk' in ('Tepat Waktu','Toleransi')),
     'telat',count(*) filter (where e->>'stMasuk'='Terlambat'),'izin',count(*) filter (where e->>'st'='Izin'),
     'sakit',count(*) filter (where e->>'st'='Sakit'),'dl',count(*) filter (where e->>'st'='Dinas Luar'),
     'belum',count(*) filter (where e->>'st'='Belum'),'alpa',count(*) filter (where e->>'st'='Alpa'))
@@ -279,6 +282,7 @@ begin
     if o ? 'JamMasuk' and o->>'JamMasuk' !~ '^([01]\d|2[0-3]):[0-5]\d$' then raise exception 'Format jam masuk salah'; end if;
     if o ? 'JamPulang' and o->>'JamPulang' !~ '^([01]\d|2[0-3]):[0-5]\d$' then raise exception 'Format jam pulang salah'; end if;
     if o ? 'ToleransiJam' and not coalesce(case when o->>'ToleransiJam' ~ '^\d+(\.\d+)?$' then (o->>'ToleransiJam')::numeric<=6 end,false) then raise exception 'Batas jam antara 0 - 6'; end if;
+    if o ? 'ToleransiTerlambat' and not coalesce(case when o->>'ToleransiTerlambat' ~ '^\d+$' then (o->>'ToleransiTerlambat')::int<=60 end,false) then raise exception 'Toleransi terlambat antara 0 - 60 menit'; end if;
     if o ? 'HariKerja' and o->>'HariKerja' !~ '^[0-6](,[0-6])*$' then raise exception 'Hari kerja tidak valid'; end if;
     if o ? 'Latitude' and not coalesce(case when o->>'Latitude' ~ '^-?\d+(\.\d+)?$' then abs((o->>'Latitude')::float8)<=90 end,false) then raise exception 'Latitude tidak valid'; end if;
     if o ? 'Longitude' and not coalesce(case when o->>'Longitude' ~ '^-?\d+(\.\d+)?$' then abs((o->>'Longitude')::float8)<=180 end,false) then raise exception 'Longitude tidak valid'; end if;
@@ -287,7 +291,7 @@ begin
       if k ~ '^Jam(Masuk|Pulang)_(KS|Guru|Tendik|Tendik2|Tendik3)$' and o->>k !~ '^([01]\d|2[0-3]):[0-5]\d$' then raise exception 'Format jam salah'; end if;
     end loop;
     for k in select jsonb_object_keys(o) loop
-      if k ~ '^Jam(Masuk|Pulang)_(KS|Guru|Tendik|Tendik2|Tendik3)$' or k = any(array['NamaSekolah','Alamat','LogoURL','TahunAjaran','Semester','JamMasuk','JamPulang','ToleransiJam','HariKerja','Latitude','Longitude','RadiusMeter','KepalaSekolah','NIPKepsek','Kota']) then
+      if k ~ '^Jam(Masuk|Pulang)_(KS|Guru|Tendik|Tendik2|Tendik3)$' or k = any(array['NamaSekolah','Alamat','LogoURL','TahunAjaran','Semester','JamMasuk','JamPulang','ToleransiJam','ToleransiTerlambat','HariKerja','Latitude','Longitude','RadiusMeter','KepalaSekolah','NIPKepsek','Kota']) then
         insert into pengaturan(kunci,nilai) values(k,trim(coalesce(o->>k,''))) on conflict (kunci) do update set nilai=excluded.nilai;
       end if;
     end loop;
@@ -349,7 +353,7 @@ begin
     if k='masuk' then
       if r.jam_masuk is not null then raise exception 'Anda sudah presensi masuk hari ini'; end if;
       if nm<jm-tol or nm>jm+tol then raise exception 'Presensi masuk dibuka pukul % - % WIB',_hm(jm-tol),_hm(jm+tol); end if;
-      update presensi set jam_masuk=nw,status_masuk=case when nm>jm then 'Terlambat' else 'Tepat Waktu' end,menit_terlambat=greatest(0,nm-jm),
+      update presensi set jam_masuk=nw,status_masuk=case when nm>jm+_tt() then 'Terlambat' when nm>jm then 'Toleransi' else 'Tepat Waktu' end,menit_terlambat=case when nm>jm+_tt() then nm-jm else 0 end,
         lat_masuk=(p->>'lat')::float8,lng_masuk=(p->>'lng')::float8,jarak_masuk=round(ds),foto_masuk=coalesce(p->>'photo','') where id=r.id returning * into r;
       msg:='Presensi masuk berhasil pukul '||nw||' ('||r.status_masuk||')';
     else
@@ -388,7 +392,7 @@ begin
       jm:=_tomin(_jam(x.jenis_ptk,'Masuk')); jp:=_tomin(_jam(x.jenis_ptk,'Pulang'));
       nm:=case when coalesce(p->>'masuk','')<>'' then _tomin(p->>'masuk') end; tol:=case when coalesce(p->>'pulang','')<>'' then _tomin(p->>'pulang') end;
       insert into presensi(tanggal,pegawai_id,nip,nama,jam_masuk,status_masuk,menit_terlambat,jam_pulang,status_pulang,menit_awal,keterangan)
-      values(d,x.id,x.nip,x.nama,nullif(p->>'masuk',''),case when nm is null then null when nm>jm then 'Terlambat' else 'Tepat Waktu' end,case when nm is null then null else greatest(0,nm-jm) end,
+      values(d,x.id,x.nip,x.nama,nullif(p->>'masuk',''),case when nm is null then null when nm>jm+_tt() then 'Terlambat' when nm>jm then 'Toleransi' else 'Tepat Waktu' end,case when nm is null then null when nm>jm+_tt() then nm-jm else 0 end,
              nullif(p->>'pulang',''),case when tol is null then null when tol<jp then 'Pulang Lebih Awal' else 'Tepat Waktu' end,case when tol is null then null else greatest(0,jp-tol) end,
              coalesce(nullif(v,''),'Koreksi admin'));
     elsif k<>'Alpa' then
