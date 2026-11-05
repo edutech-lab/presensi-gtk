@@ -162,6 +162,12 @@ body{overflow:hidden!important}
 #gtk .hud b{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:6px 13px;border-radius:999px;background:rgba(0,12,50,.68);backdrop-filter:blur(6px);color:#fff;font-size:12px;font-weight:700;line-height:1.3}
 #gtk .hud i{width:8px;height:8px;border-radius:50%;background:#94a3b8;flex:none}
 #gtk .hud.ok i{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.25)}#gtk .hud.bad i{background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.25)}
+/* Foto hasil presensi: tampil 5 detik di atas area kamera setelah presensi berhasil. Warna bingkai & bar: hijau = tepat waktu, kuning = toleransi, merah = terlambat / pulang lebih awal */
+#gtk .pfoto{--pc:#22c55e;position:absolute;inset:0;z-index:6;background:#0b1b3f;cursor:pointer;animation:pop .22s}
+#gtk .pfoto.warn{--pc:#facc15}#gtk .pfoto.bad{--pc:#ef4444}
+#gtk .pfoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+#gtk .pfoto:after{content:'';position:absolute;inset:0;border:5px solid var(--pc);border-radius:inherit;pointer-events:none}
+#gtk .pfoto .pfb{position:absolute;left:0;bottom:0;height:5px;width:100%;background:var(--pc);transform-origin:left;animation:tpb 5s linear forwards;z-index:1}
 #gtk #camPh{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:300px;font-size:12.5px;line-height:1.5}
 #gtk #camPh .spn{width:30px;height:30px;border-width:3px;border-color:rgba(255,255,255,.25);border-top-color:#22d3ee}
 #gtk .note{margin:10px 0;padding:10px 12px;border-radius:11px;background:#eff6ff;color:#1e40af;font-size:12.5px;font-weight:600}
@@ -602,7 +608,7 @@ PAGES.presensi=async()=>{P.today=await api('myToday');P.pos=null;P.gMsg='';P.str
     <div class="card nm"><div class="ch"><h3>${ic('pin')} Lokasi</h3><div style="display:flex;gap:6px;align-items:center"><span id="pDist" class="chip n">Mencari GPS...</span><button class="btn ghost" id="bGps" type="button" style="padding:5px 10px;font-size:12px">${ic('refresh',14)} Ulangi</button></div></div><div class="map" id="pmap"></div></div></div></div>`);
   if($('#bEnr'))$('#bEnr').onclick=enrollFace;if($('#bGps'))$('#bGps').onclick=()=>{P.gMsg='';gpsRun(true)};$('#bRetryPres').onclick=()=>{P.autoN=0;P.autoAt=0;P.err='';P.buf=[];$('#pRetry').classList.add('hid');pUpd()};
   initMap();startGps();P.tm=setInterval(pUpd,1000);pUpd();
-  S.cleanup=()=>{sndStop();clearInterval(P.tm);gpsStop();P.camTok++;P.camBusy=false;clearTimeout(P.det);P.det=null;if(P.stream)P.stream.getTracks().forEach(t=>t.stop());P.stream=null;if(P.map){P.map.remove();P.map=null}}};
+  S.cleanup=()=>{sndStop();clearTimeout(P.fotoTm);clearInterval(P.tm);gpsStop();P.camTok++;P.camBusy=false;clearTimeout(P.det);P.det=null;if(P.stream)P.stream.getTracks().forEach(t=>t.stop());P.stream=null;if(P.map){P.map.remove();P.map=null}}};
 function initMap(){if(!window.L)return;const la=+S.st.Latitude,ln=+S.st.Longitude;P.map=L.map('pmap',{zoomControl:true,attributionControl:false}).setView([la,ln],17);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(P.map);
   L.circle([la,ln],{radius:+S.st.RadiusMeter,color:'#1a6fe8',fillOpacity:.12,weight:2}).addTo(P.map);
@@ -749,6 +755,14 @@ async function getDesc(need=3,useBuf=true,limit=10000){if(IS)return [];if(!P.str
 /* Kamera otomatis mati saat aplikasi di latar belakang / tab disembunyikan, dan menyala lagi otomatis saat kembali ke menu presensi */
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&P.stream)stopCam()});
 window.addEventListener('pagehide',()=>{if(P.stream)stopCam()});
+/* Tampilkan foto yang diambil saat presensi selama 5 detik (otomatis hilang; ketuk untuk menutup lebih cepat). Hanya foto; warna bingkai menandakan status. */
+function showPresFoto(photo,type,rc){const c=$('#cam');if(!c||!photo)return;
+  clearTimeout(P.fotoTm);const old=$('#pFoto');if(old)old.remove();
+  const st=(type==='masuk'?rc.stMasuk:rc.stPulang)||'',k=(st==='Terlambat'||st==='Pulang Lebih Awal')?' bad':st==='Toleransi'?' warn':'';
+  const d=document.createElement('div');d.id='pFoto';d.className='pfoto'+k;d.setAttribute('role','img');d.setAttribute('aria-label','Foto presensi Anda');
+  d.innerHTML='<img alt="Foto presensi Anda" src="'+photo+'"/><u class="pfb"></u>';
+  const rm=()=>{clearTimeout(P.fotoTm);P.fotoTm=null;if(d.parentNode)d.remove()};d.onclick=rm;
+  c.appendChild(d);P.fotoTm=setTimeout(rm,5000)}
 function snap(){const c=document.createElement('canvas');c.width=320;c.height=240;const x=c.getContext('2d'),v=$('#vid');
   if(P.stream&&v&&v.videoWidth)x.drawImage(v,0,0,320,240);else{x.fillStyle='#0b1b3f';x.fillRect(0,0,320,240);x.fillStyle='#fff';x.font='16px sans-serif';x.fillText('Foto simulasi (preview)',60,125)}
   return c.toDataURL('image/jpeg',.6)}
@@ -785,6 +799,7 @@ function sndPres(kind,txt,key){if(kind==='ok')sndTone([[660,.16],[880,.16],[1175
 async function doPres(type,auto){if(P.busy)return;P.busy=true;sndUnlock();P.err='';const n=$('#pNote');n.className='note g';n.textContent=auto?'Wajah terbaca. Menyimpan presensi '+type+'...':'Memindai wajah... tahan posisi sejenak.';
   try{const desc=await getDesc(),photo=snap();const r=await api('submitPresensi',{type,lat:P.pos.lat,lng:P.pos.lng,desc,photo});P.autoOk=1;toast(r.msg,'ok');
     const rc=r.rec||{},nm=S.user.nama||'',bad=type==='masuk'?rc.stMasuk==='Terlambat':rc.stPulang==='Pulang Lebih Awal';
+    showPresFoto(photo,type,rc);
     sndPres(bad?'warn':'ok',sndText(type,bad,nm),type+(bad?(type==='masuk'?'Telat':'Awal'):'Ok'));
     try{P.today=await api('myToday')}catch(e){}}
   catch(e){P.autoN=(P.autoN||0)+1;P.autoAt=Date.now()+6000;P.err=e.message;P.errT=Date.now()+9000;toast(e.message,'err');n.className='note r';n.textContent=e.message;sndPres('err','Presensi belum berhasil. '+String(e.message||'').replace(/\.\.\.|…/g,'.').slice(0,120),'gagal')}finally{P.busy=false;pUpd()}}

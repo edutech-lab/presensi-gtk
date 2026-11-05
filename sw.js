@@ -2,7 +2,7 @@
    Hanya menyimpan "kerangka" aplikasi (halaman, manifest, ikon) agar cepat terbuka.
    Model pengenalan wajah (file publik face-api di jsDelivr) juga disimpan agar tidak diunduh ulang.
    Data presensi, wajah, login, dan permintaan ke Supabase TIDAK disimpan dan tidak disentuh. */
-const VER = 'gtk-shell-v8';
+const VER = 'gtk-shell-v10';
 const FACE = 'gtk-face-v1';
 const FACE_RE = /^https:\/\/cdn\.jsdelivr\.net\/npm\/@vladmandic\/face-api@/;
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'];

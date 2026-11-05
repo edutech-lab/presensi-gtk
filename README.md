@@ -19,9 +19,10 @@ presensi-gtk/
 
 ## Pembaruan versi ini
 
+- Setelah presensi masuk/pulang berhasil, foto wajah yang diambil kamera saat presensi ditampilkan selama 5 detik di area kamera (hanya foto, tanpa teks). Bingkai dan bar hitung mundur berwarna sesuai status: hijau = Tepat Waktu, kuning = Toleransi, merah = Terlambat / Pulang Lebih Awal. Ketuk foto untuk menutup lebih cepat. Foto yang ditampilkan sama dengan yang disimpan ke rekap. Tidak ada perubahan SQL.
 - Toleransi terlambat: presensi masuk setelah jam masuk sampai batas toleransi berstatus **Toleransi** (bukan Tepat Waktu) dan tidak dihitung terlambat (bawaan 10 menit; contoh jam masuk 07.00: 07.05 dan 07.10 = Toleransi, 07.11 = Terlambat). Diatur admin di Pengaturan > Jam Kerja & Hari Kerja > Toleransi terlambat (menit), rentang 0 - 60, isi 0 untuk tanpa toleransi. Berlaku juga pada koreksi presensi oleh admin. Menit terlambat 0 untuk status Toleransi; untuk Terlambat dihitung dari jam masuk. Pada dashboard dan rekap, status Toleransi masuk hitungan Tepat Waktu (tidak terlambat). Dashboard tidak menampilkan info toleransi. Data presensi yang sudah tersimpan tidak diubah.
 - **Wajib:** jalankan ulang seluruh `supabase/Supabase_Setup.sql` di Supabase SQL Editor (aman diulang, data tidak hilang). Tanpa itu, server belum menerapkan toleransi.
-- `sw.js` naik ke `gtk-shell-v8`.
+- `sw.js` naik ke `gtk-shell-v10`.
 
 ## Konfigurasi
 
