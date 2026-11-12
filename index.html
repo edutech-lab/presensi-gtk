@@ -1027,12 +1027,12 @@ function rkExport(){if(!S.rows||!S.rows.length)return toast('Tidak ada data untu
 function rkPrint(){if(!S.rows||!S.rows.length)return toast('Tidak ada data untuk dicetak','err');const f=S.rk,s=S.st,sum=f.tab==='sum',aoa=rkAoa();
   const PC={g:'#15803d',r:'#b91c1c',a:'#b45309',c:'#0e7490',v:'#6d28d9',n:'#475569'},cs=t=>t?`<span style="color:${PC[STC[t]||'n']};font-weight:700">${esc(t)}</span>`:'',mn=v=>v?`<span style="color:${+v>10?'#b91c1c':'#d97706'};font-weight:700">${esc(v)}</span>`:'';
   const cell=(c,i,ri)=>{if(sum)return esc(c);if(i===1)return esc(fd(c));if(i===6||i===9)return cs(c);if(i===7||i===10)return mn(c);if(i===11)return cs(c==='Belum Presensi'?'Belum':c);if(i===12){const r=S.rows[ri],m=rkMiss(r).map(x=>`<span style="color:${PC.r};font-weight:700">${esc(x)}</span>`);return m.concat(r.ket?[esc(r.ket)]:[]).join('; ')}return esc(c)};
-  const rowsH=aoa.slice(1).map((r,ri)=>'<tr>'+r.map((c,i)=>`<td${!sum&&i===1?' style="white-space:nowrap"':''}>${cell(c,i,ri)}</td>`).join('')+'</tr>').join('');
+  const rowsH=aoa.slice(1).map((r,ri)=>'<tr>'+r.map((c,i)=>`<td${!sum&&i===1?' style="white-space:nowrap"':!sum&&i>=5&&i<=11?' style="text-align:center"':''}>${cell(c,i,ri)}</td>`).join('')+'</tr>').join('');
   const peg=S.user.role==='Admin'?(f.pid?S.peg.find(p=>p.id===f.pid).nama:'Semua Pegawai'):S.user.nama;
   let pa=$('#print-area');if(pa)pa.remove();pa=document.createElement('div');pa.id='print-area';
-  pa.innerHTML=`<style>@page{size:A4 ${sum?'portrait':'landscape'};margin:15mm}#print-area,#print-area *{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style>${kopHtml(s)}
+  pa.innerHTML=`<style>@page{size:A4 ${sum?'portrait':'landscape'};margin:15mm}#print-area,#print-area *{-webkit-print-color-adjust:exact;print-color-adjust:exact}#print-area table.pd{table-layout:fixed}#print-area table.pd td{overflow-wrap:anywhere}</style>${kopHtml(s)}
   <h3>Rekap Presensi Guru dan Tenaga Kependidikan${sum?' (Ringkasan)':''}</h3><div class="pp">Periode ${esc(fd(f.from))} s.d. ${esc(fd(f.to))} &nbsp;|&nbsp; Tahun Ajaran ${esc(s.TahunAjaran)} - ${esc(s.Semester)} &nbsp;|&nbsp; ${esc(peg)}</div>
-  <table><thead><tr>${aoa[0].map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rowsH}</tbody></table>
+  <table${sum?'':' class="pd"'}>${sum?'':'<colgroup>'+[7,20,28,36,26,12,28,14,12,28,14,13,29].map(w=>`<col style="width:${w}mm"/>`).join('')+'</colgroup>'}<thead><tr>${aoa[0].map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rowsH}</tbody></table>
   <div class="ttd">${esc(s.Kota||'')}, ${esc(fd(wib().date))}<br/>Kepala Sekolah<br/><br/><br/><br/><b><u>${esc(s.KepalaSekolah||'')}</u></b><br/>NIP. ${esc(s.NIPKepsek||'-')}</div>`;
   document.body.appendChild(pa);const clean=()=>{pa.remove();window.removeEventListener('afterprint',clean)};window.addEventListener('afterprint',clean);imgsReady(pa).then(()=>setTimeout(()=>window.print(),150))}
 
