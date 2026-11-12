@@ -320,7 +320,6 @@ html,body{overscroll-behavior:none}
 #gtk .rkp td{padding:8px 6px}
 #gtk .rkp tbody tr:nth-child(even) td{background:#f8fbff}
 #gtk .rkp th.n0,#gtk .rkp td.n0{width:26px;padding-left:8px;padding-right:2px}
-#gtk .rkp .dh{display:block;color:#64748b;font-size:10.5px;line-height:1.2}#gtk .rkp .dk{display:none}
 #gtk .rkp .kc .chip{white-space:normal;text-align:center;font-size:10.5px;padding:2px 8px;line-height:1.3}
 #gtk .rkp .kc{min-width:62px}
 #gtk .rkp .kc small{font-size:10.5px}
@@ -346,9 +345,79 @@ html,body{overscroll-behavior:none}
 #gtk table.pgt th,#gtk table.pgt td{padding-left:7px;padding-right:7px}
 #gtk table.pgt td .ib.d{margin:2px 1px}
 #gtk table.pgt th.cn,#gtk table.pgt td.cn{min-width:180px;width:180px}
-#gtk table.pgt th:last-child,#gtk table.pgt td:last-child{position:sticky;right:0;z-index:2;box-shadow:-6px 0 8px -6px rgba(15,40,100,.18)}
-#gtk table.pgt td:last-child{background:#fff}#gtk table.pgt th:last-child{background:#eaf1ff;z-index:3}
-#gtk table.pgt tr:hover td:last-child{background:#f8fbff}
+#gtk table.pgt .tl1{display:block;font-weight:600}#gtk table.pgt .tl2{display:block;font-size:12px;color:#64748b}
+
+/* ===== PERBAIKAN TAMPILAN (REKAP, IZIN, KALENDER LIBUR) ===== */
+#gtk .lbg{grid-template-columns:1.3fr 1fr}
+#gtk .rkt .dh{display:block;font-size:11.5px;font-weight:600;color:#64748b;line-height:1.25}
+#gtk .rkt .dd{display:block;font-weight:700;line-height:1.3}
+#gtk .nm2{display:none}
+#gtk .td-m{display:none}
+#gtk .rkt th,#gtk .rks th{white-space:nowrap}
+#gtk .rks th.cc{white-space:normal;line-height:1.2}
+#gtk .rkp .tab{display:flex;align-items:center;justify-content:center;white-space:nowrap}
+@media(max-width:900px){
+#gtk .hm{display:none!important}
+#gtk .td-d{display:none}#gtk .td-m{display:inline}
+#gtk .nm2{display:block;font-size:10.5px;font-weight:500;color:#64748b;line-height:1.3;margin-top:1px}
+#gtk .rkp .tb.mb{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#gtk .rkp .tb.mb .in{width:100%;min-width:0;max-width:100%}
+#gtk .rkp .tb.mb .f.fw{grid-column:1/-1}
+#gtk .rkp td.cn,#gtk .rkp th.cn{min-width:130px;width:auto}
+#gtk .rkp .rkt .dd{font-size:12px}
+#gtk .rkp .rks th.cc{padding:9px 4px;font-size:10px}
+#gtk .rkp .rks td.cc{padding:8px 4px;font-weight:600}
+#gtk .rkp .rks td.n0,#gtk .rkp .rks th.n0{width:24px;padding-left:6px;padding-right:2px}
+#gtk #izW td.cn,#gtk #izW th.cn{min-width:190px;width:190px}
+#gtk .tb.mb:not(.rkb){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px;padding:0;overflow:visible}
+#gtk .tb.mb:not(.rkb) .f{min-width:0;margin-bottom:10px}
+#gtk .tb.mb:not(.rkb) .in{width:100%;min-width:0;max-width:100%}
+#gtk .lbg{grid-template-columns:minmax(0,1fr)}
+#gtk .lbg .card{padding:14px 12px}
+#gtk .lbn{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#gtk .lbn .btn{justify-content:center;width:100%}
+#gtk .lbg .cal{gap:3px}
+#gtk .lbg .cal .hh{font-size:10.5px;padding:3px 0}
+#gtk .lbg .cd{min-height:50px;padding:3px 2px;border-radius:8px;text-align:center;font-size:12px}
+#gtk .lbg .cd small{font-size:8.5px;line-height:1.1;margin-top:1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+#gtk .lbg .fg{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#gtk .lbg .fg .w{grid-column:1/-1}
+#gtk .lbg .fg .in{min-width:0;width:100%}
+}
+
+/* ===== REKAP DI HP: KARTU PER BARIS ===== */
+@media(max-width:900px){
+#gtk .rkp .tw.nscr{overflow:visible;border:0;background:transparent;box-shadow:none;padding:0;border-radius:0}
+#gtk .rkp table.rkt{display:block;width:100%;border:0;background:transparent}
+#gtk .rkp .rkt thead{display:none}
+#gtk .rkp .rkt tbody{display:block}
+#gtk .rkp .rkt tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:10px;row-gap:7px;align-items:center;background:#fff;border:1px solid #e1eafa;border-radius:14px;padding:11px 12px;margin:0 0 10px;box-shadow:0 1px 6px rgba(15,40,100,.05)}
+#gtk .rkp .rkt td{display:block;border:0;padding:0;margin:0;background:transparent!important;min-width:0;width:auto;max-width:none}
+#gtk .rkp .rkt td.n0,#gtk .rkp .rkt td.ho,#gtk .rkp .rkt td.hm{display:none!important}
+#gtk .rkp .rkt td.empty{grid-column:1/-1;text-align:center;padding:18px 0}
+#gtk .rkp .rkt.adm tr{grid-template-areas:"tgl aksi" "nama nama" "tm tp" "tkm tkp" "tk tk"}
+#gtk .rkp .rkt.peg tr{grid-template-areas:"tgl tgl" "tm tp" "tkm tkp" "tk tk"}
+#gtk .rkp .rkt .dtc{grid-area:tgl;text-align:left}
+#gtk .rkp .rkt .dtc .dh{display:inline;font-size:12px;margin-right:6px;color:#64748b}
+#gtk .rkp .rkt .dtc .dd{display:inline;font-size:13.5px;color:#0b2a6b}
+#gtk .rkp .rkt .ta{grid-area:aksi;justify-self:end}
+#gtk .rkp .rkt td.cn{grid-area:nama;padding-bottom:7px;border-bottom:1px solid #edf2fa}
+#gtk .rkp .rkt td.cn b{font-size:13.5px}
+#gtk .rkp .rkt .tm{grid-area:tm}#gtk .rkp .rkt .tp{grid-area:tp}#gtk .rkp .rkt .tkm{grid-area:tkm}#gtk .rkp .rkt .tkp{grid-area:tkp}#gtk .rkp .rkt .tk{grid-area:tk}
+#gtk .rkp .rkt .tm,#gtk .rkp .rkt .tp{text-align:center;font-size:16px;font-weight:800;color:#0b2a6b;background:#f4f8ff!important;border-radius:10px 10px 0 0;padding:7px 4px 4px}
+#gtk .rkp .rkt .tm::before,#gtk .rkp .rkt .tp::before{content:attr(data-l);display:block;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:1px}
+#gtk .rkp .rkt .tkm,#gtk .rkp .rkt .tkp{background:#f4f8ff!important;border-radius:0 0 10px 10px;padding:0 4px 8px;margin-top:-7px;min-height:6px}
+#gtk .rkp .rkt .tk .kc{flex-direction:row;flex-wrap:wrap;justify-content:center;border-top:1px dashed #dbe5f5;padding-top:7px}
+#gtk .rkp .rkt .tk .kc:empty{display:none}
+#gtk .rkp .rkt .kc{min-width:0}
+/* ringkasan per pegawai */
+#gtk .rkp .rkt.rks tr{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:8px;column-gap:7px}
+#gtk .rkp .rkt.rks td.cn{grid-column:1/-1}
+#gtk .rkp .rkt.rks td.st{text-align:center;background:#f4f8ff!important;border-radius:10px;padding:7px 2px;font-size:16px;font-weight:800;color:#0b2a6b}
+#gtk .rkp .rkt.rks td.st::before{content:attr(data-l);display:block;font-size:9.5px;font-weight:600;color:#64748b;margin-bottom:1px;line-height:1.2}
+}
+@media(max-width:900px){#gtk .rkp .rkt .tm,#gtk .rkp .rkt .tp,#gtk .rkp .rkt .tkm,#gtk .rkp .rkt .tkp{align-self:stretch}}
+@media(max-width:900px){#gtk .rkp .rkt.rks td.cn{grid-area:auto;grid-column:1/-1;grid-row:1}}
+#gtk .lbg>div:last-child{display:flex;flex-direction:column;gap:14px;min-width:0}
 </style>
 </head>
 <body>
@@ -880,7 +949,7 @@ PAGES.pegawai=async()=>{S.peg=await api('listPegawai');
   ['pgQ','pgPtk','pgSt'].forEach(i=>$('#'+i).oninput=()=>{pnReset('pg');pgDraw()});$('#pgAdd').onclick=()=>pgForm();$('#pgImp').onclick=()=>$('#pgFile').click();$('#pgFile').onchange=pgImport;$('#pgTpl').onclick=pgTemplate;$('#pgExp').onclick=pgExport;pgDraw()};
 function pgDraw(){const q=nrm($('#pgQ').value),pt=$('#pgPtk').value,s=$('#pgSt').value;
   const L=S.peg.filter(p=>(!pt||p.ptk===pt)&&(!s||p.status===s)&&(!q||nrm(p.nama+p.nip+p.nuptk).includes(q)));$('#pgCnt').textContent=L.length+' pegawai';const r=pnSlice('pg',L);
-  $('#pgB').innerHTML=L.length?r.items.map((p,i)=>`<tr${p.aktif?'':' style="opacity:.55"'}><td>${r.a+i+1}</td><td class="mono nw">${esc(p.nip)||'-'}</td><td class="mono nw">${esc(p.nuptk)||'-'}</td><td class="cn"><b>${esc(p.nama)}</b>${p.aktif?'':' '+chip('Nonaktif','n')}</td><td>${esc(p.jk)}</td><td>${esc(p.tempat)}${p.tgl?', '+esc(fd(p.tgl)):''}</td><td class="nw">${chip(p.status,'b')}</td><td class="nw">${esc(p.ptk)}</td><td>${esc(p.username)}</td><td><code>${esc(p.password)}</code></td><td>${p.face?chip('Terdaftar','g'):chip('Belum','n')}</td>
+  $('#pgB').innerHTML=L.length?r.items.map((p,i)=>`<tr${p.aktif?'':' style="opacity:.55"'}><td>${r.a+i+1}</td><td class="mono nw">${esc(p.nip)||'-'}</td><td class="mono nw">${esc(p.nuptk)||'-'}</td><td class="cn"><b>${esc(p.nama)}</b>${p.aktif?'':' '+chip('Nonaktif','n')}</td><td>${esc(p.jk)}</td><td class="nw"><span class="tl1">${esc(p.tempat)||'-'}</span>${p.tgl?`<span class="tl2">${esc(fd(p.tgl))}</span>`:''}</td><td class="nw">${chip(p.status,'b')}</td><td class="nw">${esc(p.ptk)}</td><td>${esc(p.username)}</td><td><code>${esc(p.password)}</code></td><td>${p.face?chip('Terdaftar','g'):chip('Belum','n')}</td>
   <td class="nw"><button class="ib d" data-a="pgEdit" data-id="${esc(p.id)}" title="Ubah">${ic('edit',15)}</button> ${p.face?`<button class="ib d" data-a="pgFace" data-id="${esc(p.id)}" title="Reset wajah">${ic('refresh',15)}</button> `:''}<button class="ib d r" data-a="pgDel" data-id="${esc(p.id)}" title="Hapus">${ic('trash',15)}</button></td></tr>`).join(''):`<tr><td colspan="12" class="empty">Belum ada data pegawai</td></tr>`;pnShow('#pgPn','pg',r,pgDraw)}
 A.pgEdit=t=>pgForm(S.peg.find(p=>p.id===t.dataset.id));
 A.pgDel=async t=>{const p=S.peg.find(x=>x.id===t.dataset.id);if(await ask('Hapus pegawai <b>'+esc(p.nama)+'</b>? Data presensi lama tetap tersimpan.')){try{await api('deletePegawai',{id:p.id});toast('Pegawai dihapus');PAGES.pegawai()}catch(e){toast(e.message,'err')}}};
@@ -925,9 +994,9 @@ async function pgImport(ev){const f=ev.target.files[0];ev.target.value='';if(!f)
 PAGES.rekap=async()=>{const a=S.user.role==='Admin';if(a&&!S.peg)S.peg=await api('listPegawai');const t=wib().date;S.rk=S.rk||{from:t.slice(0,8)+'01',to:t,ptk:'',status:'',pid:'',tab:'detail'};const f=S.rk;
   setView(`<div class="card rkp"><div class="ch"><h3>${ic('chart')} ${a?'Rekap Presensi Pegawai':'Rekap Presensi Saya'}</h3></div>${a?'':`<div class="rkid"><span class="rkav">${esc((S.user.nama||'?').trim().charAt(0).toUpperCase())}</span><div><b>${esc(S.user.nama)}</b><small>NIP ${esc(S.user.nip||'-')}${S.user.jenisPTK?' · '+esc(S.user.jenisPTK):''}</small></div></div>`}<div class="tb mb">
   ${fld('Dari',`<input class="in" type="date" id="rkF" value="${f.from}"/>`)}${fld('Sampai',`<input class="in" type="date" id="rkT" value="${f.to}"/>`)}
-  ${a?fld('Jenis PTK',`<select class="in" id="rkP">${opts(PTK,f.ptk,'Semua')}</select>`)+fld('Status',`<select class="in" id="rkS">${opts(STATUS,f.status,'Semua')}</select>`)+fld('Pegawai',`<select class="in" id="rkG">${opts(S.peg.map(p=>[p.id,p.nama]),f.pid,'Semua pegawai')}</select>`):''}
+  ${a?fld('Jenis PTK',`<select class="in" id="rkP">${opts(PTK,f.ptk,'Semua')}</select>`)+fld('Status',`<select class="in" id="rkS">${opts(STATUS,f.status,'Semua')}</select>`)+fld('Pegawai',`<select class="in" id="rkG">${opts(S.peg.map(p=>[p.id,p.nama]),f.pid,'Semua pegawai')}</select>`,'fw'):''}
   <div style="align-self:flex-end;margin-bottom:12px" class="tb rkb"><button class="btn" id="rkGo">${ic('search',16)} Tampilkan</button><button class="btn ghost" id="rkX">${ic('dl',16)} Export Excel</button><button class="btn ghost" id="rkPr">${ic('print',16)} Print A4</button></div></div>
-  <div class="tabs"><span class="tab ${f.tab==='detail'?'on':''}" data-a="rkTab" data-t="detail">Detail Harian</span><span class="tab ${f.tab==='sum'?'on':''}" data-a="rkTab" data-t="sum">Ringkasan per Pegawai</span></div><div id="rkSum" class="sum"></div><div class="tw nscr" id="rkW"></div><div id="rkPn"></div></div>`);
+  <div class="tabs"><span class="tab ${f.tab==='detail'?'on':''}" data-a="rkTab" data-t="detail">Detail Harian</span><span class="tab ${f.tab==='sum'?'on':''}" data-a="rkTab" data-t="sum"><span class="td-d">Ringkasan per Pegawai</span><span class="td-m">Per Pegawai</span></span></div><div id="rkSum" class="sum"></div><div class="tw nscr" id="rkW"></div><div id="rkPn"></div></div>`);
   $('#rkGo').onclick=()=>{pnReset('rkd','rks');rkLoad()};$('#rkX').onclick=rkExport;$('#rkPr').onclick=rkPrint;await rkLoad()};
 A.rkTab=t=>{S.rk.tab=t.dataset.t;$$('.tab').forEach(x=>x.classList.toggle('on',x.dataset.t===S.rk.tab));rkDraw()};
 async function rkLoad(){const f=S.rk;f.from=$('#rkF').value;f.to=$('#rkT').value;if(S.user.role==='Admin'){f.ptk=$('#rkP').value;f.status=$('#rkS').value;f.pid=$('#rkG').value}
@@ -944,8 +1013,8 @@ const rkSt=(st,mnt)=>st?`<div class="kc">${stChip(st)}${mnt?`<small>${mnt} mnt</
 const ktTxt=r=>r.st==='Hadir'?(r.ket||''):(r.st==='Belum'?'Belum presensi':r.st+(r.ket?' - '+r.ket:''));
 function rkDraw(){const rows=S.rows,f=S.rk,a=S.user.role==='Admin',c=k=>rows.filter(r=>r.st===k).length;
   $('#rkSum').innerHTML=chip(rows.length+' data','b')+chip(c('Hadir')+' Hadir','g')+chip(rows.filter(r=>r.stMasuk==='Terlambat').length+' Terlambat','r')+chip(rows.filter(r=>r.stPulang==='Pulang Lebih Awal').length+' Pulang Awal','r')+chip(c('Izin')+' Izin','a')+chip(c('Sakit')+' Sakit','c')+chip(c('Dinas Luar')+' Dinas Luar','v')+chip(c('Alpa')+' Alpa','r');
-  if(f.tab==='sum'){const pr=pnSlice('rks',summ(rows)),s=pr.items;$('#rkW').innerHTML=`<table><thead><tr><th>No</th><th>NIP</th><th class="cn">Nama</th><th>PTK</th><th>Hadir</th><th>Tepat Waktu</th><th>Terlambat</th><th>Pulang Awal</th><th>Izin</th><th>Sakit</th><th>DL</th><th>Alpa</th></tr></thead><tbody>${s.length?s.map((o,i)=>`<tr><td>${pr.a+i+1}</td><td class="mono nw">${esc(o.nip)||'-'}</td><td class="cn"><b>${esc(o.nama)}</b></td><td>${esc(o.ptk)}</td><td>${o.hadir}</td><td>${o.tepat}</td><td>${o.telat}</td><td>${o.awal}</td><td>${o.izin}</td><td>${o.sakit}</td><td>${o.dl}</td><td>${o.alpa}</td></tr>`).join(''):'<tr><td colspan="12" class="empty">Tidak ada data</td></tr>'}</tbody></table>`;pnShow('#rkPn','rks',pr,rkDraw)}
-  else{const pr=pnSlice('rkd',rows);const h=a?'':' ho';$('#rkW').innerHTML=`<table class="rkt"><thead><tr><th class="cc n0">No</th><th>Tanggal</th><th class="${h.trim()}">NIP</th><th class="cn${h}">Nama</th><th class="cc">Masuk</th><th class="cc">Ket. Masuk</th><th class="cc">Pulang</th><th class="cc">Ket. Pulang</th><th class="cc">Keterangan</th>${a?'<th class="cc">Aksi</th>':''}</tr></thead><tbody>${rows.length?pr.items.map((r,i)=>`<tr><td class="cc n0">${pr.a+i+1}</td><td class="nw"><span class="dh">${HARI[dow(r.tgl)]}</span><span class="dk">, </span><span class="dd">${esc(fd(r.tgl))}</span></td><td class="mono nw${h}">${esc(r.nip)||'-'}</td><td class="cn${h}"><b>${esc(r.nama)}</b></td><td class="mono cc">${esc(r.masuk)||'-'}</td><td class="cc">${rkSt(r.stMasuk,r.telat)}</td><td class="mono cc">${esc(r.pulang)||'-'}</td><td class="cc">${rkSt(r.stPulang,r.awal)}</td><td class="cc">${rkKetH(r)}</td>${a?`<td class="nw cc"><button class="ib d" data-a="rkEdit" data-i="${pr.a+i}" title="Koreksi">${ic('edit',15)}</button></td>`:''}</tr>`).join(''):`<tr><td colspan="${a?10:9}" class="empty">Tidak ada data pada rentang ini</td></tr>`}</tbody></table>`;pnShow('#rkPn','rkd',pr,rkDraw)}}
+  if(f.tab==='sum'){const pr=pnSlice('rks',summ(rows)),s=pr.items;$('#rkW').innerHTML=`<table class="rkt rks"><thead><tr><th class="cc n0">No</th><th class="hm">NIP</th><th class="cn">Nama</th><th class="hm">PTK</th><th class="cc">Hadir</th><th class="cc">Tepat Waktu</th><th class="cc">Terlambat</th><th class="cc">Pulang Awal</th><th class="cc">Izin</th><th class="cc">Sakit</th><th class="cc">DL</th><th class="cc">Alpa</th></tr></thead><tbody>${s.length?s.map((o,i)=>`<tr><td class="cc n0">${pr.a+i+1}</td><td class="mono nw hm">${esc(o.nip)||'-'}</td><td class="cn"><b>${esc(o.nama)}</b><small class="nm2">${esc(o.nip)||'-'}</small><small class="nm2">${esc(o.ptk)}</small></td><td class="hm">${esc(o.ptk)}</td><td class="cc st" data-l="Hadir">${o.hadir}</td><td class="cc st" data-l="Tepat Waktu">${o.tepat}</td><td class="cc st" data-l="Terlambat">${o.telat}</td><td class="cc st" data-l="Pulang Awal">${o.awal}</td><td class="cc st" data-l="Izin">${o.izin}</td><td class="cc st" data-l="Sakit">${o.sakit}</td><td class="cc st" data-l="DL">${o.dl}</td><td class="cc st" data-l="Alpa">${o.alpa}</td></tr>`).join(''):'<tr><td colspan="12" class="empty">Tidak ada data</td></tr>'}</tbody></table>`;pnShow('#rkPn','rks',pr,rkDraw)}
+  else{const pr=pnSlice('rkd',rows);const h=a?' hm':' ho';$('#rkW').innerHTML=`<table class="rkt ${a?'adm':'peg'}"><thead><tr><th class="cc n0">No</th><th class="cc">Tanggal</th><th class="${h.trim()}">NIP</th><th class="cn${a?'':' ho'}">Nama</th><th class="cc">Masuk</th><th class="cc">Ket. Masuk</th><th class="cc">Pulang</th><th class="cc">Ket. Pulang</th><th class="cc">Keterangan</th>${a?'<th class="cc">Aksi</th>':''}</tr></thead><tbody>${rows.length?pr.items.map((r,i)=>`<tr><td class="cc n0">${pr.a+i+1}</td><td class="nw cc dtc"><span class="dh">${HARIF[dow(r.tgl)]}</span><span class="dd">${esc(fd(r.tgl))}</span></td><td class="mono nw${h}">${esc(r.nip)||'-'}</td><td class="cn${a?'':' ho'}"><b>${esc(r.nama)}</b>${a?`<small class="nm2">${esc(r.nip)||'-'}</small>`:''}</td><td class="mono cc tm" data-l="Masuk">${esc(r.masuk)||'-'}</td><td class="cc tkm">${rkSt(r.stMasuk,r.telat)}</td><td class="mono cc tp" data-l="Pulang">${esc(r.pulang)||'-'}</td><td class="cc tkp">${rkSt(r.stPulang,r.awal)}</td><td class="cc tk">${rkKetH(r)}</td>${a?`<td class="nw cc ta"><button class="ib d" data-a="rkEdit" data-i="${pr.a+i}" title="Koreksi">${ic('edit',15)}</button></td>`:''}</tr>`).join(''):`<tr><td colspan="${a?10:9}" class="empty">Tidak ada data pada rentang ini</td></tr>`}</tbody></table>`;pnShow('#rkPn','rkd',pr,rkDraw)}}
 A.rkEdit=t=>{const r=S.rows[+t.dataset.i];
   const m=modal('Koreksi Presensi',`<div class="kv"><span>Pegawai</span><b>${esc(r.nama)}</b></div><div class="kv"><span>Tanggal</span><b>${esc(fdh(r.tgl))}</b></div><br/><div class="fg">${fld('Status',`<select class="in" id="eSt">${opts(['Hadir','Izin','Sakit','Dinas Luar','Alpa'],r.st==='Belum'?'Hadir':r.st)}</select>`,'w')}<div class="w fg" id="eT">${fld('Jam Masuk',`<input class="in" type="time" id="eM" value="${esc(r.masuk)}"/>`)}${fld('Jam Pulang',`<input class="in" type="time" id="eP" value="${esc(r.pulang)}"/>`)}</div>${fld('Keterangan',`<input class="in" id="eK" value="${esc(r.ket)}"/>`,'w')}</div>`,`<button class="btn ghost" data-a="mclose">Batal</button><button class="btn" id="eGo">Simpan</button>`);
   const sw=()=>$('#eT',m).classList.toggle('hid',$('#eSt',m).value!=='Hadir');$('#eSt',m).onchange=sw;sw();
@@ -971,7 +1040,7 @@ PAGES.izin=async()=>{const a=S.user.role==='Admin';if(a&&!S.peg)S.peg=await api(
   $('#izGo').onclick=()=>{pnReset('iz');izLoad()};$('#izAdd').onclick=izForm;await izLoad()};
 async function izLoad(){S.iz.from=$('#izF').value;S.iz.to=$('#izT').value;if(S.user.role==='Admin')S.iz.pid=$('#izG').value;
   const L=await api('listIzin',{from:S.iz.from,to:S.iz.to,pid:S.iz.pid});S.izL=L;const a=S.user.role==='Admin',pr=pnSlice('iz',L);
-  $('#izW').innerHTML=`<table><thead><tr><th>No</th><th>Tanggal</th>${a?'<th>Nama</th>':''}<th>Jenis</th><th>Keterangan</th><th>Lampiran</th><th>Dicatat oleh</th><th>Aksi</th></tr></thead><tbody>${L.length?pr.items.map((r,i)=>`<tr><td>${pr.a+i+1}</td><td class="nw">${esc(fdh(r.tgl))}</td>${a?`<td><b>${esc(r.nama)}</b></td>`:''}<td>${stChip(r.jenis)}</td><td>${esc(r.ket)}</td><td class="nw">${r.lamp?`<div class="lamp"><button class="ib d" data-a="izPrev" data-id="${esc(r.id)}" title="Lihat lampiran">${ic('eye',15)}</button><button class="ib d" data-a="izDl" data-id="${esc(r.id)}" title="Unduh lampiran">${ic('dl',15)}</button></div>`:'<span style="color:#94a3b8">-</span>'}</td><td>${esc(r.oleh)}</td><td><button class="ib d r" data-a="izDel" data-id="${esc(r.id)}">${ic('trash',15)}</button></td></tr>`).join(''):`<tr><td colspan="${a?8:7}" class="empty">Belum ada data</td></tr>`}</tbody></table>`;pnShow('#izPn','iz',pr,izLoad)}
+  $('#izW').innerHTML=`<table><thead><tr><th>No</th><th>Tanggal</th>${a?'<th class="cn">Nama</th>':''}<th>Jenis</th><th>Keterangan</th><th>Lampiran</th><th>Dicatat oleh</th><th>Aksi</th></tr></thead><tbody>${L.length?pr.items.map((r,i)=>`<tr><td>${pr.a+i+1}</td><td class="nw">${esc(fdh(r.tgl))}</td>${a?`<td class="cn"><b>${esc(r.nama)}</b></td>`:''}<td>${stChip(r.jenis)}</td><td>${esc(r.ket)}</td><td class="nw">${r.lamp?`<div class="lamp"><button class="ib d" data-a="izPrev" data-id="${esc(r.id)}" title="Lihat lampiran">${ic('eye',15)}</button><button class="ib d" data-a="izDl" data-id="${esc(r.id)}" title="Unduh lampiran">${ic('dl',15)}</button></div>`:'<span style="color:#94a3b8">-</span>'}</td><td>${esc(r.oleh)}</td><td><button class="ib d r" data-a="izDel" data-id="${esc(r.id)}">${ic('trash',15)}</button></td></tr>`).join(''):`<tr><td colspan="${a?8:7}" class="empty">Belum ada data</td></tr>`}</tbody></table>`;pnShow('#izPn','iz',pr,izLoad)}
 A.izDel=async t=>{if(await ask('Hapus data ini?')){try{await api('deleteIzin',{id:t.dataset.id});toast('Data dihapus');izLoad()}catch(e){toast(e.message,'err')}}};
 A.izPrev=async t=>{const r=(S.izL||[]).find(x=>x.id===t.dataset.id);if(!r||!r.lamp)return;
   try{const b=await suratBlob(r),u=URL.createObjectURL(b),pdf=b.type==='application/pdf';
@@ -994,7 +1063,7 @@ function lbDraw(){const [y,m]=S.cm.split('-').map(Number),first=new Date(Date.UT
   let cells='';['Min','Sen','Sel','Rab','Kam','Jum','Sab'].forEach(h=>cells+=`<div class="hh">${h}</div>`);for(let i=0;i<first;i++)cells+='<div class="cd xx"></div>';
   for(let d=1;d<=days;d++){const ds=`${y}-${pad(m)}-${pad(d)}`,w=dow(ds);cells+=`<div class="cd ${lib[ds]?'hl':!hk.includes(w)?'we':''} ${ds===td?'td':''}" data-a="lbPick" data-d="${ds}"><b>${d}</b>${lib[ds]?`<small>${esc(lib[ds])}</small>`:''}</div>`}
   const ys=S.cm.slice(0,4),L=S.lb.filter(l=>l.tgl.slice(0,4)===ys);
-  setView(`<div class="g2" style="grid-template-columns:1.3fr 1fr"><div class="card nm"><div class="ch"><h3>${ic('cal')} ${MONF[m-1]} ${y}</h3><div class="tb"><button class="btn ghost sm" data-a="lbNav" data-n="-1">&laquo; Sebelumnya</button><button class="btn ghost sm" data-a="lbNav" data-n="1">Berikutnya &raquo;</button></div></div><div class="cal">${cells}</div><p style="font-size:12px;color:#64748b;margin-top:10px">Merah muda = bukan hari kerja &middot; Merah = hari libur. Klik tanggal untuk mengisi formulir.</p></div>
+  setView(`<div class="g2 lbg"><div class="card nm"><div class="ch"><h3>${ic('cal')} ${MONF[m-1]} ${y}</h3><div class="tb lbn"><button class="btn ghost sm" data-a="lbNav" data-n="-1">&laquo; Sebelumnya</button><button class="btn ghost sm" data-a="lbNav" data-n="1">Berikutnya &raquo;</button></div></div><div class="cal">${cells}</div><p style="font-size:12px;color:#64748b;margin-top:10px">Merah muda = bukan hari kerja &middot; Merah = hari libur. Klik tanggal untuk mengisi formulir.</p></div>
   <div><div class="card"><div class="ch"><h3>${ic('plus')} Tambah Hari Libur</h3></div><div class="fg">${fld('Dari',`<input class="in" type="date" id="lF" value="${td}"/>`)}${fld('Sampai',`<input class="in" type="date" id="lT" value="${td}"/>`)}${fld('Keterangan *',`<input class="in" id="lK" placeholder="Contoh: Libur Semester"/>`,'w')}</div><button class="btn full" id="lGo">Simpan</button></div>
   <div class="card nm"><div class="ch"><h3>Daftar Libur ${ys}</h3><span class="cnt">${L.length}</span></div><div class="tw" style="max-height:300px"><table><tbody>${L.length?L.map(l=>`<tr><td class="nw">${esc(fdh(l.tgl))}</td><td>${esc(l.ket)}</td><td><button class="ib d r" data-a="lbDel" data-id="${esc(l.id)}">${ic('trash',15)}</button></td></tr>`).join(''):'<tr><td class="empty">Belum ada hari libur</td></tr>'}</tbody></table></div></div></div></div>`);
   $('#lGo').onclick=async()=>{const f=$('#lF').value,t=$('#lT').value,k=$('#lK').value.trim();if(!f||!t||f>t||!k)return toast('Lengkapi tanggal dan keterangan','err');if(daysBetween(f,t)>120)return toast('Maksimal 120 hari sekali input','err');
