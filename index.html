@@ -291,6 +291,40 @@ html,body{overscroll-behavior:none}
 #gtk .lg-l{padding-top:calc(28px + var(--sat))}
 #gtk .lg-r{margin-bottom:calc(18px + var(--sab))}
 }
+
+/* REKAP PRESENSI - rapi & profesional */
+#gtk .cc{text-align:center}#gtk th.cc{text-align:center}
+#gtk .kc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.25}
+#gtk .kc small{font-size:11px;color:#64748b;font-weight:600;white-space:nowrap}
+#gtk .kc .kt2{font-size:12px;color:#334155;text-align:center;overflow-wrap:anywhere}
+#gtk .rkt td{vertical-align:middle}
+#gtk .rkt .dd{font-weight:600}
+#gtk .rkid{display:none}
+@media(max-width:900px){
+#gtk .ho{display:none!important}
+#gtk .rkp{padding:14px 12px}
+#gtk .rkp .ch{margin-bottom:10px}
+#gtk .rkid{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:12px;border-radius:14px;background:linear-gradient(135deg,#eaf1ff,#f6f9ff);border:1px solid #d5e3fb}
+#gtk .rkid .rkav{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#2a7bf0,#0147ac);color:#fff;display:grid;place-items:center;font-weight:800;font-size:16px;flex:none}
+#gtk .rkid div{min-width:0;line-height:1.3}#gtk .rkid b{display:block;font-size:14px;color:#0b2a6b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#gtk .rkid small{font-size:12px;color:#64748b}
+#gtk .rkp .tb.mb{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;padding:0;overflow:visible}
+#gtk .rkp .tb.mb .f{margin-bottom:10px;min-width:0}
+#gtk .rkp .rkb{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+#gtk .rkp .rkb .btn{justify-content:center;padding:10px 4px;font-size:12px;gap:5px}#gtk .rkp .rkb .btn svg{width:14px;height:14px}
+#gtk .rkp .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}#gtk .rkp .tab{text-align:center;padding:9px 6px;font-size:13px}
+#gtk .rkp .sum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+#gtk .rkp .sum .chip{text-align:center;white-space:normal;line-height:1.25;padding:7px 2px;border-radius:10px;font-size:11px}
+#gtk .rkp .tw{max-height:70vh;border-radius:12px}
+#gtk .rkp table{font-size:12px}
+#gtk .rkp th{padding:9px 6px;font-size:10.5px}
+#gtk .rkp td{padding:8px 6px}
+#gtk .rkp tbody tr:nth-child(even) td{background:#f8fbff}
+#gtk .rkp th.n0,#gtk .rkp td.n0{width:26px;padding-left:8px;padding-right:2px}
+#gtk .rkp .dh{display:block;color:#64748b;font-size:10.5px;line-height:1.2}#gtk .rkp .dk{display:none}
+#gtk .rkp .kc .chip{white-space:normal;text-align:center;font-size:10.5px;padding:2px 8px;line-height:1.3}
+#gtk .rkp .kc{min-width:62px}
+#gtk .rkp .kc small{font-size:10.5px}
+}
 </style>
 </head>
 <body>
@@ -849,10 +883,10 @@ async function pgImport(ev){const f=ev.target.files[0];ev.target.value='';if(!f)
 
 /* ================= REKAP ================= */
 PAGES.rekap=async()=>{const a=S.user.role==='Admin';if(a&&!S.peg)S.peg=await api('listPegawai');const t=wib().date;S.rk=S.rk||{from:t.slice(0,8)+'01',to:t,ptk:'',status:'',pid:'',tab:'detail'};const f=S.rk;
-  setView(`<div class="card"><div class="ch"><h3>${ic('chart')} ${a?'Rekap Presensi Pegawai':'Rekap Presensi Saya'}</h3></div><div class="tb mb">
+  setView(`<div class="card rkp"><div class="ch"><h3>${ic('chart')} ${a?'Rekap Presensi Pegawai':'Rekap Presensi Saya'}</h3></div>${a?'':`<div class="rkid"><span class="rkav">${esc((S.user.nama||'?').trim().charAt(0).toUpperCase())}</span><div><b>${esc(S.user.nama)}</b><small>NIP ${esc(S.user.nip||'-')}${S.user.jenisPTK?' · '+esc(S.user.jenisPTK):''}</small></div></div>`}<div class="tb mb">
   ${fld('Dari',`<input class="in" type="date" id="rkF" value="${f.from}"/>`)}${fld('Sampai',`<input class="in" type="date" id="rkT" value="${f.to}"/>`)}
   ${a?fld('Jenis PTK',`<select class="in" id="rkP">${opts(PTK,f.ptk,'Semua')}</select>`)+fld('Status',`<select class="in" id="rkS">${opts(STATUS,f.status,'Semua')}</select>`)+fld('Pegawai',`<select class="in" id="rkG">${opts(S.peg.map(p=>[p.id,p.nama]),f.pid,'Semua pegawai')}</select>`):''}
-  <div style="align-self:flex-end;margin-bottom:12px" class="tb"><button class="btn" id="rkGo">${ic('search',16)} Tampilkan</button><button class="btn ghost" id="rkX">${ic('dl',16)} Export Excel</button><button class="btn ghost" id="rkPr">${ic('print',16)} Print A4</button></div></div>
+  <div style="align-self:flex-end;margin-bottom:12px" class="tb rkb"><button class="btn" id="rkGo">${ic('search',16)} Tampilkan</button><button class="btn ghost" id="rkX">${ic('dl',16)} Export Excel</button><button class="btn ghost" id="rkPr">${ic('print',16)} Print A4</button></div></div>
   <div class="tabs"><span class="tab ${f.tab==='detail'?'on':''}" data-a="rkTab" data-t="detail">Detail Harian</span><span class="tab ${f.tab==='sum'?'on':''}" data-a="rkTab" data-t="sum">Ringkasan per Pegawai</span></div><div id="rkSum" class="sum"></div><div class="tw" id="rkW"></div></div>`);
   $('#rkGo').onclick=rkLoad;$('#rkX').onclick=rkExport;$('#rkPr').onclick=rkPrint;await rkLoad()};
 A.rkTab=t=>{S.rk.tab=t.dataset.t;$$('.tab').forEach(x=>x.classList.toggle('on',x.dataset.t===S.rk.tab));rkDraw()};
@@ -862,17 +896,22 @@ async function rkLoad(){const f=S.rk;f.from=$('#rkF').value;f.to=$('#rkT').value
 function summ(rows){const m={};rows.forEach(r=>{const o=m[r.pid]=m[r.pid]||{nip:r.nip,nama:r.nama,ptk:r.ptk,hadir:0,tepat:0,telat:0,awal:0,izin:0,sakit:0,dl:0,alpa:0};
   if(r.st==='Hadir'){o.hadir++;if(r.stMasuk==='Tepat Waktu'||r.stMasuk==='Toleransi')o.tepat++;if(r.stMasuk==='Terlambat')o.telat++;if(r.stPulang==='Pulang Lebih Awal')o.awal++}else if(r.st==='Izin')o.izin++;else if(r.st==='Sakit')o.sakit++;else if(r.st==='Dinas Luar')o.dl++;else if(r.st==='Alpa')o.alpa++});
   return Object.values(m).sort((a,b)=>a.nama.localeCompare(b.nama))}
+const rkClosed=(r,k)=>{const w=wib();if(r.tgl<w.date)return true;if(r.tgl>w.date)return false;const j=jamOf(r.ptk),tol=(+S.st.ToleransiJam||0)*60;return toMin(w.time.slice(0,5))>toMin(k==='m'?j.m:j.p)+tol};
+const rkMiss=r=>{if(r.st!=='Hadir'&&r.st!=='Belum')return[];const o=[];if(!r.masuk&&rkClosed(r,'m'))o.push('Tidak Absen Masuk');if(!r.pulang&&rkClosed(r,'p'))o.push('Tidak Absen Pulang');return o};
+const rkKetTxt=r=>rkMiss(r).concat(r.ket?[r.ket]:[]).join('; ');
+const rkKetH=r=>`<div class="kc">${r.st==='Hadir'?'':stChip(r.st)}${rkMiss(r).map(x=>chip(x,'r')).join('')}${r.ket?`<span class="kt2">${esc(r.ket)}</span>`:''}</div>`;
+const rkSt=(st,mnt)=>st?`<div class="kc">${stChip(st)}${mnt?`<small>${mnt} mnt</small>`:''}</div>`:'';
 const ktTxt=r=>r.st==='Hadir'?(r.ket||''):(r.st==='Belum'?'Belum presensi':r.st+(r.ket?' - '+r.ket:''));
 function rkDraw(){const rows=S.rows,f=S.rk,a=S.user.role==='Admin',c=k=>rows.filter(r=>r.st===k).length;
   $('#rkSum').innerHTML=chip(rows.length+' data','b')+chip(c('Hadir')+' Hadir','g')+chip(rows.filter(r=>r.stMasuk==='Terlambat').length+' Terlambat','r')+chip(rows.filter(r=>r.stPulang==='Pulang Lebih Awal').length+' Pulang Awal','r')+chip(c('Izin')+' Izin','a')+chip(c('Sakit')+' Sakit','c')+chip(c('Dinas Luar')+' Dinas Luar','v')+chip(c('Alpa')+' Alpa','r');
   if(f.tab==='sum'){const s=summ(rows);$('#rkW').innerHTML=`<table><thead><tr><th>No</th><th>NIP</th><th class="cn">Nama</th><th>PTK</th><th>Hadir</th><th>Tepat Waktu</th><th>Terlambat</th><th>Pulang Awal</th><th>Izin</th><th>Sakit</th><th>DL</th><th>Alpa</th></tr></thead><tbody>${s.length?s.map((o,i)=>`<tr><td>${i+1}</td><td class="mono nw">${esc(o.nip)||'-'}</td><td class="cn"><b>${esc(o.nama)}</b></td><td>${esc(o.ptk)}</td><td>${o.hadir}</td><td>${o.tepat}</td><td>${o.telat}</td><td>${o.awal}</td><td>${o.izin}</td><td>${o.sakit}</td><td>${o.dl}</td><td>${o.alpa}</td></tr>`).join(''):'<tr><td colspan="12" class="empty">Tidak ada data</td></tr>'}</tbody></table>`}
-  else $('#rkW').innerHTML=`<table><thead><tr><th>No</th><th>Tanggal</th><th>NIP</th><th class="cn">Nama</th><th>Masuk</th><th>Ket. Masuk</th><th>Pulang</th><th>Ket. Pulang</th><th>Keterangan</th>${a?'<th>Aksi</th>':''}</tr></thead><tbody>${rows.length?rows.map((r,i)=>`<tr><td>${i+1}</td><td class="nw">${esc(fdh(r.tgl))}</td><td class="mono nw">${esc(r.nip)||'-'}</td><td class="cn"><b>${esc(r.nama)}</b></td><td class="mono">${esc(r.masuk)||'-'}</td><td>${r.stMasuk?stChip(r.stMasuk)+(r.telat?' <small>'+r.telat+' mnt</small>':''):''}</td><td class="mono">${esc(r.pulang)||'-'}</td><td>${r.stPulang?stChip(r.stPulang)+(r.awal?' <small>'+r.awal+' mnt</small>':''):''}</td><td>${r.st==='Hadir'?esc(r.ket):stChip(r.st)+' '+esc(r.ket)}</td>${a?`<td class="nw"><button class="ib d" data-a="rkEdit" data-i="${i}" title="Koreksi">${ic('edit',15)}</button></td>`:''}</tr>`).join(''):`<tr><td colspan="10" class="empty">Tidak ada data pada rentang ini</td></tr>`}</tbody></table>`}
+  else{const h=a?'':' ho';$('#rkW').innerHTML=`<table class="rkt"><thead><tr><th class="cc n0">No</th><th>Tanggal</th><th class="${h.trim()}">NIP</th><th class="cn${h}">Nama</th><th class="cc">Masuk</th><th class="cc">Ket. Masuk</th><th class="cc">Pulang</th><th class="cc">Ket. Pulang</th><th class="cc">Keterangan</th>${a?'<th class="cc">Aksi</th>':''}</tr></thead><tbody>${rows.length?rows.map((r,i)=>`<tr><td class="cc n0">${i+1}</td><td class="nw"><span class="dh">${HARI[dow(r.tgl)]}</span><span class="dk">, </span><span class="dd">${esc(fd(r.tgl))}</span></td><td class="mono nw${h}">${esc(r.nip)||'-'}</td><td class="cn${h}"><b>${esc(r.nama)}</b></td><td class="mono cc">${esc(r.masuk)||'-'}</td><td class="cc">${rkSt(r.stMasuk,r.telat)}</td><td class="mono cc">${esc(r.pulang)||'-'}</td><td class="cc">${rkSt(r.stPulang,r.awal)}</td><td class="cc">${rkKetH(r)}</td>${a?`<td class="nw cc"><button class="ib d" data-a="rkEdit" data-i="${i}" title="Koreksi">${ic('edit',15)}</button></td>`:''}</tr>`).join(''):`<tr><td colspan="${a?10:9}" class="empty">Tidak ada data pada rentang ini</td></tr>`}</tbody></table>`}}
 A.rkEdit=t=>{const r=S.rows[+t.dataset.i];
   const m=modal('Koreksi Presensi',`<div class="kv"><span>Pegawai</span><b>${esc(r.nama)}</b></div><div class="kv"><span>Tanggal</span><b>${esc(fdh(r.tgl))}</b></div><br/><div class="fg">${fld('Status',`<select class="in" id="eSt">${opts(['Hadir','Izin','Sakit','Dinas Luar','Alpa'],r.st==='Belum'?'Hadir':r.st)}</select>`,'w')}<div class="w fg" id="eT">${fld('Jam Masuk',`<input class="in" type="time" id="eM" value="${esc(r.masuk)}"/>`)}${fld('Jam Pulang',`<input class="in" type="time" id="eP" value="${esc(r.pulang)}"/>`)}</div>${fld('Keterangan',`<input class="in" id="eK" value="${esc(r.ket)}"/>`,'w')}</div>`,`<button class="btn ghost" data-a="mclose">Batal</button><button class="btn" id="eGo">Simpan</button>`);
   const sw=()=>$('#eT',m).classList.toggle('hid',$('#eSt',m).value!=='Hadir');$('#eSt',m).onchange=sw;sw();
   $('#eGo',m).onclick=async()=>{try{await api('saveRekap',{pid:r.pid,tgl:r.tgl,st:$('#eSt').value,masuk:$('#eM').value,pulang:$('#eP').value,ket:$('#eK').value.trim()});closeModal();toast('Koreksi disimpan');rkLoad()}catch(e){toast(e.message,'err')}}};
 function rkAoa(){const f=S.rk;if(f.tab==='sum')return[['No','NIP','Nama','Jenis PTK','Hadir','Tepat Waktu','Terlambat','Pulang Awal','Izin','Sakit','Dinas Luar','Alpa']].concat(summ(S.rows).map((o,i)=>[i+1,o.nip,o.nama,o.ptk,o.hadir,o.tepat,o.telat,o.awal,o.izin,o.sakit,o.dl,o.alpa]));
-  return[['No','Tanggal','NIP','Nama','Jenis PTK','Masuk','Ket. Masuk','Menit Terlambat','Pulang','Ket. Pulang','Menit Pulang Awal','Status','Keterangan']].concat(S.rows.map((r,i)=>[i+1,r.tgl,r.nip,r.nama,r.ptk,r.masuk,r.stMasuk,r.telat||'',r.pulang,r.stPulang,r.awal||'',r.st==='Belum'?'Belum Presensi':r.st,r.ket]))}
+  return[['No','Tanggal','NIP','Nama','Jenis PTK','Masuk','Ket. Masuk','Menit Terlambat','Pulang','Ket. Pulang','Menit Pulang Awal','Status','Keterangan']].concat(S.rows.map((r,i)=>[i+1,r.tgl,r.nip,r.nama,r.ptk,r.masuk,r.stMasuk,r.telat||'',r.pulang,r.stPulang,r.awal||'',r.st==='Belum'?'Belum Presensi':r.st,rkKetTxt(r)]))}
 function rkExport(){if(!S.rows||!S.rows.length)return toast('Tidak ada data untuk diexport','err');const f=S.rk;const wb=XLSX.utils.book_new();const tab=f.tab;
   f.tab='detail';XLSX.utils.book_append_sheet(wb,sheetStr(rkAoa(),[5,12,22,28,20,8,12,14,8,18,16,16,30]),'Detail Harian');f.tab='sum';XLSX.utils.book_append_sheet(wb,sheetStr(rkAoa(),[5,22,28,20,8,12,10,12,6,6,10,6]),'Ringkasan');f.tab=tab;
   dlXlsx(wb,'Rekap_Presensi_'+f.from+'_sd_'+f.to+'.xlsx')}
