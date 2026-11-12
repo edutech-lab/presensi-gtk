@@ -327,7 +327,7 @@ html,body{overscroll-behavior:none}
 }
 
 /* TABEL TANPA SCROLL VERTIKAL + PAGINATION */
-#gtk .tw.nv{max-height:none;overflow-x:auto;overflow-y:hidden}
+#gtk .tw.nscr{max-height:none;overflow-x:auto;overflow-y:hidden}
 #gtk .pn{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin-top:12px;font-size:12.5px;color:#475a7a}
 #gtk .pn-i b{color:#0b2a6b}
 #gtk .pn-s{display:flex;align-items:center;gap:8px}#gtk .pn-s label{font-weight:600}
@@ -339,6 +339,16 @@ html,body{overscroll-behavior:none}
 #gtk .pn-b button:disabled{opacity:.4;cursor:default}
 #gtk .pn-d{padding:0 2px;color:#94a3b8}
 @media(max-width:900px){#gtk .pn{flex-direction:column;align-items:stretch;gap:10px;text-align:center}#gtk .pn-s,#gtk .pn-b{justify-content:center}#gtk .pn-b button{min-width:36px;height:36px}}
+
+/* tombol aksi tabel sejajar (tidak menumpuk) */
+#gtk td .ib.d{display:inline-grid;vertical-align:middle;margin:2px 2px}
+#gtk td.nw{white-space:nowrap}
+#gtk table.pgt th,#gtk table.pgt td{padding-left:7px;padding-right:7px}
+#gtk table.pgt td .ib.d{margin:2px 1px}
+#gtk table.pgt th.cn,#gtk table.pgt td.cn{min-width:180px;width:180px}
+#gtk table.pgt th:last-child,#gtk table.pgt td:last-child{position:sticky;right:0;z-index:2;box-shadow:-6px 0 8px -6px rgba(15,40,100,.18)}
+#gtk table.pgt td:last-child{background:#fff}#gtk table.pgt th:last-child{background:#eaf1ff;z-index:3}
+#gtk table.pgt tr:hover td:last-child{background:#f8fbff}
 </style>
 </head>
 <body>
@@ -866,11 +876,11 @@ const PTMAP={kepalasekolah:'Kepala Sekolah',ks:'Kepala Sekolah',kepsek:'Kepala S
 PAGES.pegawai=async()=>{S.peg=await api('listPegawai');
   setView(`<div class="card"><div class="ch"><h3>${ic('users')} Data Pegawai <span class="cnt" id="pgCnt"></span></h3><div class="tb"><input id="pgQ" class="in" placeholder="Cari nama / NIP / NUPTK"/><select id="pgPtk" class="in">${opts(PTK,'','Semua PTK')}</select><select id="pgSt" class="in">${opts(STATUS,'','Semua Status')}</select></div></div>
   <div class="tb mb"><button class="btn" id="pgAdd">${ic('plus',16)} Tambah</button><button class="btn ghost" id="pgImp">${ic('ul',16)} Import Excel</button><button class="btn ghost" id="pgTpl">${ic('dl',16)} Template</button><button class="btn ghost" id="pgExp">${ic('dl',16)} Export Excel</button><input type="file" id="pgFile" accept=".xlsx,.xls,.csv" class="hid"/></div>
-  <div class="tw nv"><table><thead><tr><th>No</th><th>NIP</th><th>NUPTK</th><th class="cn">Nama</th><th>L/P</th><th>Tempat, Tgl Lahir</th><th>Status</th><th>Jenis PTK</th><th>Username</th><th>Password</th><th>Wajah</th><th>Aksi</th></tr></thead><tbody id="pgB"></tbody></table></div><div id="pgPn"></div></div>`);
+  <div class="tw nscr"><table class="pgt"><thead><tr><th>No</th><th>NIP</th><th>NUPTK</th><th class="cn">Nama</th><th>L/P</th><th>Tempat, Tgl Lahir</th><th>Status</th><th>Jenis PTK</th><th>Username</th><th>Password</th><th>Wajah</th><th>Aksi</th></tr></thead><tbody id="pgB"></tbody></table></div><div id="pgPn"></div></div>`);
   ['pgQ','pgPtk','pgSt'].forEach(i=>$('#'+i).oninput=()=>{pnReset('pg');pgDraw()});$('#pgAdd').onclick=()=>pgForm();$('#pgImp').onclick=()=>$('#pgFile').click();$('#pgFile').onchange=pgImport;$('#pgTpl').onclick=pgTemplate;$('#pgExp').onclick=pgExport;pgDraw()};
 function pgDraw(){const q=nrm($('#pgQ').value),pt=$('#pgPtk').value,s=$('#pgSt').value;
   const L=S.peg.filter(p=>(!pt||p.ptk===pt)&&(!s||p.status===s)&&(!q||nrm(p.nama+p.nip+p.nuptk).includes(q)));$('#pgCnt').textContent=L.length+' pegawai';const r=pnSlice('pg',L);
-  $('#pgB').innerHTML=L.length?r.items.map((p,i)=>`<tr${p.aktif?'':' style="opacity:.55"'}><td>${r.a+i+1}</td><td class="mono nw">${esc(p.nip)||'-'}</td><td class="mono nw">${esc(p.nuptk)||'-'}</td><td class="cn"><b>${esc(p.nama)}</b>${p.aktif?'':' '+chip('Nonaktif','n')}</td><td>${esc(p.jk)}</td><td class="nw">${esc(p.tempat)}${p.tgl?', '+esc(fd(p.tgl)):''}</td><td class="nw">${chip(p.status,'b')}</td><td class="nw">${esc(p.ptk)}</td><td>${esc(p.username)}</td><td><code>${esc(p.password)}</code></td><td>${p.face?chip('Terdaftar','g'):chip('Belum','n')}</td>
+  $('#pgB').innerHTML=L.length?r.items.map((p,i)=>`<tr${p.aktif?'':' style="opacity:.55"'}><td>${r.a+i+1}</td><td class="mono nw">${esc(p.nip)||'-'}</td><td class="mono nw">${esc(p.nuptk)||'-'}</td><td class="cn"><b>${esc(p.nama)}</b>${p.aktif?'':' '+chip('Nonaktif','n')}</td><td>${esc(p.jk)}</td><td>${esc(p.tempat)}${p.tgl?', '+esc(fd(p.tgl)):''}</td><td class="nw">${chip(p.status,'b')}</td><td class="nw">${esc(p.ptk)}</td><td>${esc(p.username)}</td><td><code>${esc(p.password)}</code></td><td>${p.face?chip('Terdaftar','g'):chip('Belum','n')}</td>
   <td class="nw"><button class="ib d" data-a="pgEdit" data-id="${esc(p.id)}" title="Ubah">${ic('edit',15)}</button> ${p.face?`<button class="ib d" data-a="pgFace" data-id="${esc(p.id)}" title="Reset wajah">${ic('refresh',15)}</button> `:''}<button class="ib d r" data-a="pgDel" data-id="${esc(p.id)}" title="Hapus">${ic('trash',15)}</button></td></tr>`).join(''):`<tr><td colspan="12" class="empty">Belum ada data pegawai</td></tr>`;pnShow('#pgPn','pg',r,pgDraw)}
 A.pgEdit=t=>pgForm(S.peg.find(p=>p.id===t.dataset.id));
 A.pgDel=async t=>{const p=S.peg.find(x=>x.id===t.dataset.id);if(await ask('Hapus pegawai <b>'+esc(p.nama)+'</b>? Data presensi lama tetap tersimpan.')){try{await api('deletePegawai',{id:p.id});toast('Pegawai dihapus');PAGES.pegawai()}catch(e){toast(e.message,'err')}}};
@@ -917,7 +927,7 @@ PAGES.rekap=async()=>{const a=S.user.role==='Admin';if(a&&!S.peg)S.peg=await api
   ${fld('Dari',`<input class="in" type="date" id="rkF" value="${f.from}"/>`)}${fld('Sampai',`<input class="in" type="date" id="rkT" value="${f.to}"/>`)}
   ${a?fld('Jenis PTK',`<select class="in" id="rkP">${opts(PTK,f.ptk,'Semua')}</select>`)+fld('Status',`<select class="in" id="rkS">${opts(STATUS,f.status,'Semua')}</select>`)+fld('Pegawai',`<select class="in" id="rkG">${opts(S.peg.map(p=>[p.id,p.nama]),f.pid,'Semua pegawai')}</select>`):''}
   <div style="align-self:flex-end;margin-bottom:12px" class="tb rkb"><button class="btn" id="rkGo">${ic('search',16)} Tampilkan</button><button class="btn ghost" id="rkX">${ic('dl',16)} Export Excel</button><button class="btn ghost" id="rkPr">${ic('print',16)} Print A4</button></div></div>
-  <div class="tabs"><span class="tab ${f.tab==='detail'?'on':''}" data-a="rkTab" data-t="detail">Detail Harian</span><span class="tab ${f.tab==='sum'?'on':''}" data-a="rkTab" data-t="sum">Ringkasan per Pegawai</span></div><div id="rkSum" class="sum"></div><div class="tw nv" id="rkW"></div><div id="rkPn"></div></div>`);
+  <div class="tabs"><span class="tab ${f.tab==='detail'?'on':''}" data-a="rkTab" data-t="detail">Detail Harian</span><span class="tab ${f.tab==='sum'?'on':''}" data-a="rkTab" data-t="sum">Ringkasan per Pegawai</span></div><div id="rkSum" class="sum"></div><div class="tw nscr" id="rkW"></div><div id="rkPn"></div></div>`);
   $('#rkGo').onclick=()=>{pnReset('rkd','rks');rkLoad()};$('#rkX').onclick=rkExport;$('#rkPr').onclick=rkPrint;await rkLoad()};
 A.rkTab=t=>{S.rk.tab=t.dataset.t;$$('.tab').forEach(x=>x.classList.toggle('on',x.dataset.t===S.rk.tab));rkDraw()};
 async function rkLoad(){const f=S.rk;f.from=$('#rkF').value;f.to=$('#rkT').value;if(S.user.role==='Admin'){f.ptk=$('#rkP').value;f.status=$('#rkS').value;f.pid=$('#rkG').value}
@@ -957,7 +967,7 @@ function rkPrint(){if(!S.rows||!S.rows.length)return toast('Tidak ada data untuk
 
 /* ================= IZIN / SAKIT / DL ================= */
 PAGES.izin=async()=>{const a=S.user.role==='Admin';if(a&&!S.peg)S.peg=await api('listPegawai');const t=wib().date;S.iz=S.iz||{from:t.slice(0,8)+'01',to:addD(t,31),pid:''};
-  setView(`<div class="card"><div class="ch"><h3>${ic('file')} Izin / Sakit / Dinas Luar</h3><button class="btn" id="izAdd">${ic('plus',16)} Tambah</button></div><div class="tb mb">${fld('Dari',`<input class="in" type="date" id="izF" value="${S.iz.from}"/>`)}${fld('Sampai',`<input class="in" type="date" id="izT" value="${S.iz.to}"/>`)}${a?fld('Pegawai',`<select class="in" id="izG">${opts(S.peg.map(p=>[p.id,p.nama]),S.iz.pid,'Semua pegawai')}</select>`):''}<div style="align-self:flex-end;margin-bottom:12px"><button class="btn ghost" id="izGo">${ic('search',16)} Tampilkan</button></div></div><div class="tw nv" id="izW"></div><div id="izPn"></div></div>`);
+  setView(`<div class="card"><div class="ch"><h3>${ic('file')} Izin / Sakit / Dinas Luar</h3><button class="btn" id="izAdd">${ic('plus',16)} Tambah</button></div><div class="tb mb">${fld('Dari',`<input class="in" type="date" id="izF" value="${S.iz.from}"/>`)}${fld('Sampai',`<input class="in" type="date" id="izT" value="${S.iz.to}"/>`)}${a?fld('Pegawai',`<select class="in" id="izG">${opts(S.peg.map(p=>[p.id,p.nama]),S.iz.pid,'Semua pegawai')}</select>`):''}<div style="align-self:flex-end;margin-bottom:12px"><button class="btn ghost" id="izGo">${ic('search',16)} Tampilkan</button></div></div><div class="tw nscr" id="izW"></div><div id="izPn"></div></div>`);
   $('#izGo').onclick=()=>{pnReset('iz');izLoad()};$('#izAdd').onclick=izForm;await izLoad()};
 async function izLoad(){S.iz.from=$('#izF').value;S.iz.to=$('#izT').value;if(S.user.role==='Admin')S.iz.pid=$('#izG').value;
   const L=await api('listIzin',{from:S.iz.from,to:S.iz.to,pid:S.iz.pid});S.izL=L;const a=S.user.role==='Admin',pr=pnSlice('iz',L);
