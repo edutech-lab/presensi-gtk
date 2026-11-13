@@ -71,3 +71,8 @@ Kamera dan GPS hanya berfungsi lewat HTTPS (domain Cloudflare sudah HTTPS).
 
 - Ambang kecocokan wajah di database tetap 0,55 (jarak Euclidean). Pegawai yang wajahnya sudah terdaftar tidak perlu mendaftar ulang.
 - Halaman diberi `noindex` agar tidak muncul di mesin pencari.
+
+## Catatan pembaruan: jenis Cuti
+- Jenis izin bertambah: **Cuti Tahunan, Cuti Melahirkan, Cuti Ibadah Haji** (dihitung sebagai Izin di rekap dan dashboard, bukan Alpa).
+- **Wajib** jalankan ulang seluruh `supabase/Supabase_Setup.sql` di Supabase SQL Editor (aman diulang, data tidak hilang) agar database menerima jenis baru.
+- Jumlah data per halaman tabel: default **100** (pilihan 50/100/150/200/Semua).

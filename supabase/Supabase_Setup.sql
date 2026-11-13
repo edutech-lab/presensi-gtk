@@ -40,11 +40,14 @@ create index if not exists presensi_tgl_idx on presensi(tanggal);
 create table if not exists izin(
   id text primary key default substr(replace(gen_random_uuid()::text,'-',''),1,10),
   tanggal date not null, pegawai_id text not null, nip text not null default '', nama text not null default '',
-  jenis text not null check (jenis in ('Izin','Sakit','Dinas Luar')), keterangan text not null default '',
+  jenis text not null check (jenis in ('Izin','Sakit','Dinas Luar','Cuti Tahunan','Cuti Melahirkan','Cuti Ibadah Haji')), keterangan text not null default '',
   dibuat_oleh text not null default 'Admin', dibuat_pada timestamptz not null default now(), unique(pegawai_id,tanggal));
 -- lampiran surat (URL file di Storage bucket gtk-surat)
 alter table izin add column if not exists lampiran_url text not null default '';
 alter table izin add column if not exists lampiran_tipe text not null default '';
+-- jenis izin: tambah Cuti Tahunan, Cuti Melahirkan, Cuti Ibadah Haji (aman untuk database yang sudah ada)
+alter table izin drop constraint if exists izin_jenis_check;
+alter table izin add constraint izin_jenis_check check (jenis in ('Izin','Sakit','Dinas Luar','Cuti Tahunan','Cuti Melahirkan','Cuti Ibadah Haji'));
 
 create table if not exists libur(
   id text primary key default substr(replace(gen_random_uuid()::text,'-',''),1,10),
@@ -146,7 +149,7 @@ create or replace function _rows(f date, t date, ids text[]) returns jsonb langu
 create or replace function _cnt(r jsonb) returns jsonb language sql stable as $$
   select jsonb_build_object(
     'hadir',count(*) filter (where e->>'st'='Hadir'),'tepat',count(*) filter (where e->>'stMasuk' in ('Tepat Waktu','Toleransi')),
-    'telat',count(*) filter (where e->>'stMasuk'='Terlambat'),'izin',count(*) filter (where e->>'st'='Izin'),
+    'telat',count(*) filter (where e->>'stMasuk'='Terlambat'),'izin',count(*) filter (where e->>'st' in ('Izin','Cuti Tahunan','Cuti Melahirkan','Cuti Ibadah Haji')),
     'sakit',count(*) filter (where e->>'st'='Sakit'),'dl',count(*) filter (where e->>'st'='Dinas Luar'),
     'belum',count(*) filter (where e->>'st'='Belum'),'alpa',count(*) filter (where e->>'st'='Alpa'))
   from jsonb_array_elements(r) e $$;
@@ -380,7 +383,7 @@ begin
     select * into x from pegawai where id=p->>'pid';
     if not found then raise exception 'Pegawai tidak ditemukan'; end if;
     d:=_d(p->>'tgl'); k:=p->>'st';
-    if k not in ('Hadir','Izin','Sakit','Dinas Luar','Alpa') then raise exception 'Status tidak valid'; end if;
+    if k not in ('Hadir','Izin','Sakit','Dinas Luar','Cuti Tahunan','Cuti Melahirkan','Cuti Ibadah Haji','Alpa') then raise exception 'Status tidak valid'; end if;
     if coalesce(p->>'masuk','')<>'' and p->>'masuk' !~ '^([01]\d|2[0-3]):[0-5]\d$' then raise exception 'Format jam masuk salah'; end if;
     if coalesce(p->>'pulang','')<>'' and p->>'pulang' !~ '^([01]\d|2[0-3]):[0-5]\d$' then raise exception 'Format jam pulang salah'; end if;
     if k='Hadir' and coalesce(p->>'masuk','')='' and coalesce(p->>'pulang','')='' then raise exception 'Isi minimal salah satu jam (masuk/pulang)'; end if;
@@ -448,7 +451,7 @@ begin
     pid:=case when adm then p->>'pid' else u.id end;
     select * into x from pegawai where id=pid;
     if not found then raise exception 'Pegawai tidak ditemukan'; end if;
-    if coalesce(p->>'jenis','') not in ('Izin','Sakit','Dinas Luar') then raise exception 'Jenis tidak valid'; end if;
+    if coalesce(p->>'jenis','') not in ('Izin','Sakit','Dinas Luar','Cuti Tahunan','Cuti Melahirkan','Cuti Ibadah Haji') then raise exception 'Jenis tidak valid'; end if;
     f:=_d(p->>'from'); t:=_d(p->>'to');
     if f>t then raise exception 'Rentang tanggal tidak valid'; end if;
     if t-f>92 then raise exception 'Maksimal 92 hari sekali input'; end if;
